@@ -234,41 +234,46 @@ export default function CalendarPage() {
                   key={day.toISOString()}
                   onClick={() => handleDayClick(day)}
                   disabled={!isSelectedMonth}
-                  className={`min-h-[64px] sm:min-h-[80px] p-2 rounded-2xl flex flex-col justify-between transition-all cursor-pointer text-left relative ${cellStyle} ${
+                  className={`h-16 sm:h-20 p-1.5 rounded-2xl flex flex-col transition-all cursor-pointer text-left relative ${cellStyle} ${
                     !isSelectedMonth ? 'opacity-30 cursor-default pointer-events-none' : ''
                   } ${isTodayDay ? 'ring-2 ring-primary ring-offset-2' : ''}`}
                 >
+                  {/* Day number + icon row — always top */}
                   <div className="flex items-center justify-between w-full">
                     <span
-                      className={`text-xs font-semibold ${
-                        isTodayDay ? 'w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[11px]' : ''
+                      className={`text-xs font-semibold leading-none ${
+                        isTodayDay
+                          ? 'w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center text-[11px]'
+                          : ''
                       }`}
                     >
                       {format(day, 'd')}
                     </span>
-
                     {status.isOvulation && (
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <Sparkles className="w-3 h-3 text-amber-600" />
                     )}
                     {status.isRecordedPeriod && (
-                      <Droplets className="w-3.5 h-3.5 text-white" />
+                      <Droplets className="w-3 h-3 text-white" />
                     )}
                   </div>
 
-                  {status.isRecordedPeriod && status.flow && (
-                    <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-white/30 text-white w-fit">
-                      {status.flow}
-                    </span>
-                  )}
-                  {status.isPredictedPeriod && (
-                    <span className="text-[9px] font-semibold text-primary">Predicted</span>
-                  )}
-                  {status.isOvulation && (
-                    <span className="text-[9px] font-bold text-amber-800">Ovulation</span>
-                  )}
-                  {status.isFertile && !status.isOvulation && (
-                    <span className="text-[9px] font-medium text-purple-700">Fertile</span>
-                  )}
+                  {/* Status label — always bottom, fixed space */}
+                  <div className="mt-auto">
+                    {status.isRecordedPeriod && status.flow && (
+                      <span className="text-[8px] font-extrabold uppercase tracking-wide px-1 py-0.5 rounded-full bg-white/30 text-white">
+                        {status.flow}
+                      </span>
+                    )}
+                    {status.isPredictedPeriod && (
+                      <span className="text-[8px] font-semibold text-primary block leading-none">Predicted</span>
+                    )}
+                    {status.isOvulation && (
+                      <span className="text-[8px] font-bold text-amber-800 block leading-none">Ovulation</span>
+                    )}
+                    {status.isFertile && !status.isOvulation && (
+                      <span className="text-[8px] font-medium text-purple-700 block leading-none">Fertile</span>
+                    )}
+                  </div>
                 </button>
               );
             })}

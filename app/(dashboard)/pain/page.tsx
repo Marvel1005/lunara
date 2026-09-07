@@ -115,16 +115,14 @@ export default function PainPage() {
             className="w-full p-4 rounded-2xl bg-muted/20 border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none leading-relaxed"
           />
 
-          <div className="flex justify-end pt-2">
-            <button
-              type="submit"
-              disabled={isAdding}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-bold shadow-comfort hover:opacity-95 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 tactile-button"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{isAdding ? 'Saving Log...' : 'Save Check-in to Supabase'}</span>
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isAdding}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-sm font-bold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 tactile-button"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{isAdding ? 'Saving...' : 'Save Check-in'}</span>
+          </button>
         </div>
       </form>
 
