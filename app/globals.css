@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-outfit: 'Outfit', sans-serif;
+  
+  /* DEFAULT THEME STYLE: Warm Minimal */
+  --background: #FDFBF7;
+  --foreground: #2D2628;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-bg-elevated: #FFFFFF;
+  --card-fg: #2D2628;
+  --primary: #9C727D;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #F5E6E8;
+  --secondary: #E6E1F4;
+  --secondary-fg: #3B334B;
+  --accent: #E8C5C8;
+  --accent-fg: #4A2E35;
+  --accent-soft: #FDF4F5;
+  --muted: #F3EFEA;
+  --muted-fg: #7A6F73;
+  --border: #EFE8DF;
+  --border-accent: #E4D5CE;
+  --header-bg: rgba(253, 251, 247, 0.85);
+  --glow-accent: rgba(156, 114, 125, 0.12);
+  --shadow-elevated: 0 12px 32px -8px rgba(74, 46, 53, 0.08);
+  --radius-theme: 1.5rem;
+}
+
+/* -------------------------------------------------------------------------- */
+/* THEME STYLES (Layer 1: Visual Personalities - Normal State)                */
+/* -------------------------------------------------------------------------- */
+
+/* 1. Warm Minimal */
+[data-style="warm-minimal"] {
+  --background: #FDFBF7;
+  --foreground: #2D2628;
+  --card-bg: rgba(255, 255, 255, 0.88);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #9C727D;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #F5E6E8;
+  --accent: #E8C5C8;
+  --border: #EFE8DF;
+  --glow-accent: rgba(156, 114, 125, 0.12);
+}
+
+/* 2. Soft Floral — Elegant Botanical (Rosewood & Sage) */
+[data-style="soft-floral"] {
+  --background: #FAF7F2;
+  --foreground: #2C2426;
+  --card-bg: rgba(255, 253, 250, 0.92);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #C08594;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #F6ECEE;
+  --secondary: #E1ECE3;
+  --secondary-fg: #233B2B;
+  --accent: #7FA382;
+  --accent-fg: #1D3323;
+  --accent-soft: #EDF5EE;
+  --border: #E5D8CF;
+  --glow-accent: rgba(192, 133, 148, 0.14);
+}
+
+/* 3. Cute & Cozy — Warm Playful (Warm Coral & Honey Yellow) */
+[data-style="cute-cozy"] {
+  --background: #FFF5E8;
+  --foreground: #3B2421;
+  --card-bg: rgba(255, 252, 244, 0.93);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #E8736B;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #FFEBE8;
+  --secondary: #FCE6B8;
+  --secondary-fg: #4A3015;
+  --accent: #F5B85C;
+  --accent-fg: #4A3015;
+  --accent-soft: #FFF5E3;
+  --border: #F5CEB8;
+  --glow-accent: rgba(232, 115, 107, 0.16);
+}
+
+/* 4. Lavender Dream */
+[data-style="lavender-dream"] {
+  --background: #FAF8FE;
+  --foreground: #2C2638;
+  --card-bg: rgba(255, 253, 255, 0.9);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #8E7BB0;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #EFEBF8;
+  --secondary: #E3DCF2;
+  --secondary-fg: #312644;
+  --accent: #C4B5E0;
+  --accent-fg: #312644;
+  --accent-soft: #F6F3FC;
+  --border: #E8E0F4;
+  --glow-accent: rgba(142, 123, 176, 0.14);
+}
+
+/* 5. Peach Calm */
+[data-style="peach-calm"] {
+  --background: #FDF7F3;
+  --foreground: #332622;
+  --card-bg: rgba(255, 251, 247, 0.9);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #D9836C;
+  --primary-fg: #FFFFFF;
+  --primary-soft: #FBEADF;
+  --secondary: #F7DCD2;
+  --secondary-fg: #47271F;
+  --accent: #EEB5A3;
+  --accent-fg: #47271F;
+  --accent-soft: #FDF1ED;
+  --border: #F6DFC7;
+  --glow-accent: rgba(217, 131, 108, 0.15);
+}
+
+/* 6. Midnight Comfort */
+[data-style="midnight-comfort"] {
+  --background: #18141F;
+  --foreground: #F5EEF8;
+  --card-bg: rgba(30, 24, 40, 0.85);
+  --card-bg-elevated: #261F33;
+  --card-fg: #F5EEF8;
+  --primary: #B28BC7;
+  --primary-fg: #18141F;
+  --primary-soft: #382B45;
+  --secondary: #2C2338;
+  --secondary-fg: #E6D9F2;
+  --accent: #9A72B8;
+  --accent-fg: #F5EEF8;
+  --accent-soft: #30243D;
+  --muted: #241D2E;
+  --muted-fg: #AA9BB8;
+  --border: #3A2F47;
+  --border-accent: #524263;
+  --header-bg: rgba(24, 20, 31, 0.88);
+  --glow-accent: rgba(178, 139, 199, 0.2);
+  --shadow-elevated: 0 16px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* -------------------------------------------------------------------------- */
+/* CYCLE STATE TRANSFORMATIONS (Layer 2: Comfort Mode per Visual Personality) */
+/* -------------------------------------------------------------------------- */
+
+/* 1. Warm Minimal Comfort */
+[data-style="warm-minimal"][data-cycle-state="comfort"],
+[data-style="warm-minimal"][data-theme="comfort"] {
+  --background: #FCF6F2;
+  --foreground: #342427;
+  --card-bg: rgba(255, 248, 245, 0.94);
+  --card-bg-elevated: #FFFBF9;
+  --primary: #A66E7C;
+  --primary-soft: #F9E5EA;
+  --accent: #ECCACD;
+  --muted: #F8E9E5;
+  --muted-fg: #856A70;
+  --border: #F1DED6;
+  --glow-accent: rgba(166, 110, 124, 0.2);
+}
+
+/* 2. Soft Floral Comfort */
+[data-style="soft-floral"][data-cycle-state="comfort"],
+[data-style="soft-floral"][data-theme="comfort"] {
+  --background: #FAF4F2;
+  --foreground: #332326;
+  --card-bg: rgba(255, 247, 245, 0.94);
+  --card-bg-elevated: #FFFBF9;
+  --primary: #BE7283;
+  --primary-soft: #F8E5E9;
+  --secondary: #D8E4DC;
+  --accent: #8FA693;
+  --muted: #F6E7E3;
+  --muted-fg: #85696E;
+  --border: #ECDAD1;
+  --glow-accent: rgba(190, 114, 131, 0.2);
+}
+
+/* 3. Cute & Cozy Comfort */
+[data-style="cute-cozy"][data-cycle-state="comfort"],
+[data-style="cute-cozy"][data-theme="comfort"] {
+  --background: #FFF3EF;
+  --foreground: #3D2327;
+  --card-bg: rgba(255, 245, 241, 0.95);
+  --card-bg-elevated: #FFFBF8;
+  --primary: #DE6F83;
+  --primary-soft: #FDE2E7;
+  --secondary: #FCE0CF;
+  --accent: #F1AA8A;
+  --muted: #FBE6DD;
+  --muted-fg: #8C6269;
+  --border: #F7CEC2;
+  --glow-accent: rgba(222, 111, 131, 0.22);
+}
+
+/* 4. Lavender Dream Comfort */
+[data-style="lavender-dream"][data-cycle-state="comfort"],
+[data-style="lavender-dream"][data-theme="comfort"] {
+  --background: #F7F3FD;
+  --foreground: #312338;
+  --card-bg: rgba(253, 249, 255, 0.94);
+  --card-bg-elevated: #FFFFFF;
+  --primary: #856EAA;
+  --primary-soft: #EFE6FB;
+  --secondary: #DCD3EE;
+  --accent: #BBA7DD;
+  --muted: #EFE6FA;
+  --muted-fg: #7A6598;
+  --border: #E3D7F2;
+  --glow-accent: rgba(133, 110, 170, 0.2);
+}
+
+/* 5. Peach Calm Comfort */
+[data-style="peach-calm"][data-cycle-state="comfort"],
+[data-style="peach-calm"][data-theme="comfort"] {
+  --background: #FCF2EB;
+  --foreground: #3B241E;
+  --card-bg: rgba(255, 246, 240, 0.94);
+  --card-bg-elevated: #FFFBF7;
+  --primary: #D7765D;
+  --primary-soft: #FDE5DA;
+  --secondary: #F6CEBF;
+  --accent: #EAA794;
+  --muted: #F8E4D8;
+  --muted-fg: #8E655B;
+  --border: #F4D3B8;
+  --glow-accent: rgba(215, 118, 93, 0.22);
+}
+
+/* 6. Midnight Comfort Comfort */
+[data-style="midnight-comfort"][data-cycle-state="comfort"],
+[data-style="midnight-comfort"][data-theme="comfort"] {
+  --background: #191118;
+  --foreground: #FBE8ED;
+  --card-bg: rgba(38, 22, 31, 0.9);
+  --card-bg-elevated: #351D28;
+  --card-fg: #FBE8ED;
+  --primary: #DF8296;
+  --primary-fg: #191118;
+  --primary-soft: #45212A;
+  --secondary: #301F29;
+  --secondary-fg: #F6D5DD;
+  --accent: #C76B7E;
+  --accent-fg: #FBE8ED;
+  --muted: #271921;
+  --muted-fg: #B5959F;
+  --border: #4A2733;
+  --glow-accent: rgba(223, 130, 150, 0.25);
+  --shadow-elevated: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
+}
+
+/* Fallback Comfort Mode */
+[data-cycle-state="comfort"]:not([data-style]),
+[data-theme="comfort"]:not([data-style]) {
+  --background: #FCF3F1;
+  --foreground: #361F24;
+  --card-bg: rgba(255, 246, 244, 0.94);
+  --card-bg-elevated: #FFF9F8;
+  --primary: #CA6E7F;
+  --primary-soft: #FBE5EA;
+  --accent: #E5A3AF;
+  --muted: #F8E6E3;
+  --muted-fg: #8C666D;
+  --border: #F3D0C9;
+}
+
+/* -------------------------------------------------------------------------- */
+/* GLOBAL STYLES & CARD ELEVATION SYSTEMS                                     */
+/* -------------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), 'Inter', sans-serif;
+  transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s ease;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+}
+
+.glass-header {
+  background: var(--header-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.card-depth-primary {
+  background: var(--card-bg-elevated);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-elevated);
+  border-radius: var(--radius-theme);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.card-depth-primary:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-elevated), 0 0 24px var(--glow-accent);
+}
+
+.card-depth-secondary {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-theme);
+  transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+}
+
+.tactile-button {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.tactile-button:active {
+  transform: scale(0.97);
+}
+
+.tactile-button:hover {
+  box-shadow: 0 6px 20px var(--glow-accent);
+}
+
+@keyframes gentlePulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+.animate-gentle-pulse {
+  animation: gentlePulse 4s ease-in-out infinite;
+}
+
+/* Reduced Motion Compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
