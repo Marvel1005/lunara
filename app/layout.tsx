@@ -6,6 +6,22 @@ import { AuthProvider } from '@/providers/auth-provider';
 export const metadata: Metadata = {
   title: 'Lunara — Your cycle. Your comfort.',
   description: 'A premium personal menstrual-cycle and wellness companion.',
+  icons: {
+    icon: [
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+  },
+  themeColor: '#4A1942',
+  openGraph: {
+    title: 'Lunara — Your cycle. Your comfort.',
+    description: 'A premium personal menstrual-cycle and wellness companion.',
+    images: [{ url: '/icon.png' }],
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
