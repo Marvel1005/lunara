@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Mail, ChevronRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { createClient } from '@/lib/supabase/client';
 
 interface PartnerConnectFlowProps {
   onClose: () => void;
@@ -23,16 +24,32 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
     setStep('sending');
 
     try {
-      // Direct POST to server API route.
-      // Server verifies session, invokes RPC server-side, builds URL, dispatches email, and discards raw token.
-      const response = await fetch('/api/partner/send-invitation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invitee_email: partnerEmail.trim(),
-          partner_name: partnerName.trim() || undefined,
-        }),
-      });
+      // Get the current user's JWT to authenticate the Edge Function call
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError('You must be signed in to send an invitation.');
+        setStep('error');
+        return;
+      }
+
+      // Call the Supabase Edge Function (server-side SMTP, no third-party email API)
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/send-partner-invitation`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          },
+          body: JSON.stringify({
+            invitee_email: partnerEmail.trim(),
+            partner_name: partnerName.trim() || undefined,
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -46,7 +63,7 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
       queryClient.invalidateQueries({ queryKey: ['partner_connections'] });
       setStep('sent');
     } catch {
-      setError("Network error reaching email service. Please try again.");
+      setError('Network error reaching email service. Please try again.');
       setStep('error');
     }
   };
