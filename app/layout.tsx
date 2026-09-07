@@ -1,7 +1,11 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { QueryProvider } from '@/providers/query-provider';
 import { AuthProvider } from '@/providers/auth-provider';
+
+export const viewport: Viewport = {
+  themeColor: '#4A1942',
+};
 
 export const metadata: Metadata = {
   title: 'Lunara — Your cycle. Your comfort.',
@@ -15,7 +19,6 @@ export const metadata: Metadata = {
     ],
     shortcut: '/icon.png',
   },
-  themeColor: '#4A1942',
   openGraph: {
     title: 'Lunara — Your cycle. Your comfort.',
     description: 'A premium personal menstrual-cycle and wellness companion.',
