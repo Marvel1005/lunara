@@ -208,59 +208,75 @@ serve(async (req: Request) => {
       expires_at: string;
     };
 
-    // 5. Build the acceptance link (raw_token stays server-side only)
+    // 5. Build the acceptance link for the authorized inviter
     const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') || 'http://localhost:3000';
     const inviteeLinkUrl = `${appUrl}/partner/accept?token=${raw_token}`;
 
-    // 6. Send via SMTP
-    const smtpHost = Deno.env.get('SMTP_HOST');
-    const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587');
-    const smtpUsername = Deno.env.get('SMTP_USERNAME');
-    const smtpPassword = Deno.env.get('SMTP_PASSWORD');
-    const emailFrom = Deno.env.get('EMAIL_FROM') || smtpUsername;
+    // 6. Optional Gmail SMTP delivery using Google App Password
+    // Secret names: GMAIL_USER, GMAIL_APP_PASSWORD (with backward-compatible SMTP_* fallbacks)
+    const gmailUser = Deno.env.get('GMAIL_USER') || Deno.env.get('SMTP_USERNAME');
+    const gmailAppPassword = Deno.env.get('GMAIL_APP_PASSWORD') || Deno.env.get('SMTP_PASSWORD');
+    const smtpHost = Deno.env.get('SMTP_HOST') || 'smtp.gmail.com';
+    const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '465');
+    const emailFrom = Deno.env.get('EMAIL_FROM') || (gmailUser ? `Lunara <${gmailUser}>` : undefined);
 
-    if (!smtpHost || !smtpUsername || !smtpPassword) {
-      // Rollback the DB invitation so no orphaned record lingers
-      await supabase.rpc('cancel_partner_invitation', { p_invitation_id: invitation_id });
-      return new Response(
-        JSON.stringify({ error: 'Email service is not configured. Set SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD in Edge Function secrets.' }),
-        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    let emailSent = false;
+
+    if (gmailUser && gmailAppPassword) {
+      try {
+        const client = new SmtpClient();
+        if (smtpPort === 465) {
+          await client.connectTLS({
+            hostname: smtpHost,
+            port: smtpPort,
+            username: gmailUser,
+            password: gmailAppPassword,
+          });
+        } else {
+          await client.connect({
+            hostname: smtpHost,
+            port: smtpPort,
+          });
+          await client.startTLS({
+            hostname: smtpHost,
+            username: gmailUser,
+            password: gmailAppPassword,
+          });
+        }
+
+        await client.send({
+          from: emailFrom || gmailUser,
+          to: cleanEmail,
+          subject: `${cleanPartnerName ? `${cleanPartnerName} wants` : 'Someone wants'} to support you on Lunara`,
+          html: buildInvitationEmail({
+            inviteeLinkUrl,
+            partnerName: cleanPartnerName || '',
+            expiresAt: expires_at,
+          }),
+        });
+
+        await client.close();
+        emailSent = true;
+      } catch (smtpError) {
+        // Non-fatal: Gmail SMTP delivery failure must NOT destroy an otherwise valid invitation.
+        // We log a safe warning without exposing credentials or tokens, and keep the invitation active.
+        console.warn(
+          '[send-partner-invitation] Email delivery failed or unavailable. Falling back to secure link sharing.'
+        );
+        emailSent = false;
+      }
     }
 
-    const client = new SmtpClient();
-    try {
-      await client.connectTLS({
-        hostname: smtpHost,
-        port: smtpPort,
-        username: smtpUsername,
-        password: smtpPassword,
-      });
-
-      await client.send({
-        from: emailFrom!,
-        to: cleanEmail,
-        subject: `${cleanPartnerName ? `${cleanPartnerName} wants` : 'Someone wants'} to support you on Lunara`,
-        html: buildInvitationEmail({
-          inviteeLinkUrl,
-          partnerName: cleanPartnerName || '',
-          expiresAt: expires_at,
-        }),
-      });
-
-      await client.close();
-    } catch (smtpError) {
-      console.error('[send-partner-invitation] SMTP error:', smtpError);
-      await supabase.rpc('cancel_partner_invitation', { p_invitation_id: invitation_id });
-      return new Response(
-        JSON.stringify({ error: 'Could not deliver invitation email. Please try again.' }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // 7. Return success — raw_token is NEVER sent back to the client
+    // 7. Return usable invitation info to the authorized inviter
+    // Safe: Invitation URL contains token for the inviter to copy/share directly.
     return new Response(
-      JSON.stringify({ success: true, invitation_id }),
+      JSON.stringify({
+        success: true,
+        invitation_id,
+        invitation_url: inviteeLinkUrl,
+        expires_at,
+        email_sent: emailSent,
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

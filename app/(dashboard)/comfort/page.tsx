@@ -1,208 +1,251 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ThemeCornerDecor, ThemeBadge } from '@/components/theme/theme-decorations';
-import { Sparkles, Heart, Flame, BedDouble, Maximize2, ShieldAlert, ChevronRight, Wind } from 'lucide-react';
+import { Sparkles, Bed, Sofa, Laptop, Car, Moon, Wind } from 'lucide-react';
+
+type SituationKey = 'bed' | 'sofa' | 'desk' | 'travel' | 'sleep';
+
+interface ComfortPosition {
+  id: string;
+  situation: SituationKey;
+  title: string;
+  subtitle: string;
+  description: string;
+  cushionTip: string;
+  gentleGuidance: string;
+}
+
+const positions: ComfortPosition[] = [
+  // Bed
+  {
+    id: 'bed-side-curl',
+    situation: 'bed',
+    title: 'Supported Side Curl',
+    subtitle: 'Gentle on the lower back and abdomen',
+    description:
+      'Lie on your side with your knees comfortably drawn toward your chest. Place a soft pillow between your knees and tuck a small folded blanket against your abdomen.',
+    cushionTip: 'A pillow between your knees keeps your hips aligned without muscular strain.',
+    gentleGuidance: 'Try this position if it feels comfortable. Rest your arms loosely around a pillow and breathe at your own natural pace.',
+  },
+  {
+    id: 'bed-knee-elevation',
+    situation: 'bed',
+    title: 'Elevated Knee Rest',
+    subtitle: 'Relieves lower back pressure when lying flat',
+    description:
+      'Lie on your back with two standard pillows or a soft folded duvet stacked underneath your knees, letting your legs rest with a slight bend.',
+    cushionTip: 'Having your knees elevated allows your lower back to settle flat against the mattress.',
+    gentleGuidance: 'Stay here for as long as feels good. You can rest a warm compress on your lower belly.',
+  },
+
+  // Sofa
+  {
+    id: 'sofa-recline',
+    situation: 'sofa',
+    title: 'Supported Sofa Recline',
+    subtitle: 'Comfortable semi-seated rest during the day',
+    description:
+      'Lean back into the sofa corner with generous pillow support behind your upper and lower back. Draw your feet up onto the sofa cushions with knees bent loosely to one side.',
+    cushionTip: 'Place a small cushion under your lower ribs to avoid slouching or hunching.',
+    gentleGuidance: 'A cozy choice for watching a movie or resting when lying completely flat feels too heavy.',
+  },
+  {
+    id: 'sofa-chest-support',
+    situation: 'sofa',
+    title: 'Forward Cushion Embrace',
+    subtitle: 'Warmth and counter-pressure while resting on a couch',
+    description:
+      'Kneel or sit sideways on the sofa and lean your upper body forward onto a stack of soft cushions, resting your cheek on the side.',
+    cushionTip: 'Stack two cushions so your chest is fully supported without twisting your neck.',
+    gentleGuidance: 'Allow your belly to be completely soft and relaxed against the cushions.',
+  },
+
+  // Desk / Studying / Working
+  {
+    id: 'desk-cushion-lean',
+    situation: 'desk',
+    title: 'Desk Forward Lean',
+    subtitle: 'Quiet rest during study or work breaks',
+    description:
+      'Place a soft jacket, sweater, or cushion on your desk in front of you. Fold your arms over it and rest your forehead gently on your forearms for a few minutes.',
+    cushionTip: 'Fold a thick scarf or sweater if a dedicated cushion is not available.',
+    gentleGuidance: 'Take 2–3 minutes to let your shoulders drop away from your ears and soften your jaw.',
+  },
+  {
+    id: 'desk-lumbar-ground',
+    situation: 'desk',
+    title: 'Grounded Seated Posture',
+    subtitle: 'Reduces pelvic strain while sitting at a computer',
+    description:
+      'Sit fully back in your chair with a small cushion behind your lower back. Rest both feet flat on the floor or on a small footstool or binder.',
+    cushionTip: 'Slightly elevating your feet reduces tension in the hip flexors.',
+    gentleGuidance: 'Try this if you need to be at your desk. Stand up and take a gentle 30-second walk every hour if you can.',
+  },
+
+  // Travelling
+  {
+    id: 'travel-seated-support',
+    situation: 'travel',
+    title: 'Travel Lumbar Support',
+    subtitle: 'Comfort on trains, buses, or flights',
+    description:
+      'Roll a light jacket, cardigan, or travel pillow and place it firmly at your lower back curve. Rest your hands loosely in your lap with a warm drink or heat patch.',
+    cushionTip: 'A rolled scarf or sweatshirt provides customized lower back support.',
+    gentleGuidance: 'Focus on gentle, slow breaths down into your lower abdomen during transit.',
+  },
+  {
+    id: 'travel-knee-cross',
+    situation: 'travel',
+    title: 'Low-Angle Foot Rest',
+    subtitle: 'Eases sitting fatigue in tight seats',
+    description:
+      'Place your backpack or personal item under your feet to act as an impromptu footrest, lifting your knees slightly above hip level.',
+    cushionTip: 'Even 2–3 inches of foot elevation softens abdominal muscle engagement.',
+    gentleGuidance: 'Adjust whenever you feel pressure shift. Wear loose, non-restrictive waistbands.',
+  },
+
+  // Sleeping
+  {
+    id: 'sleep-side-body',
+    situation: 'sleep',
+    title: 'Full Body Alignment',
+    subtitle: 'For restful night sleep during painful nights',
+    description:
+      'Lie on your side with a medium pillow between your knees and your top arm draped comfortably over a second body pillow.',
+    cushionTip: 'A full-length body pillow prevents your upper hip from twisting forward during the night.',
+    gentleGuidance: 'If one side feels tender, gently shift to the other side. Keep a glass of water and comfort items nearby.',
+  },
+  {
+    id: 'sleep-supine-cradle',
+    situation: 'sleep',
+    title: 'Supine Pelvic Cradle',
+    subtitle: 'When side sleeping causes pressure',
+    description:
+      'Sleep on your back with a firm pillow under your knees and a low, soft pillow under your head so your neck stays relaxed.',
+    cushionTip: 'Keep your knees slightly parted to let your inner thighs and pelvic floor relax completely.',
+    gentleGuidance: 'Try this position if it feels comfortable. A soft, warm blanket adds soothing weight.',
+  },
+];
+
+const situations: { key: SituationKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: 'bed', label: 'In Bed', icon: Bed },
+  { key: 'sofa', label: 'On the Sofa', icon: Sofa },
+  { key: 'desk', label: 'Studying & Desk', icon: Laptop },
+  { key: 'travel', label: 'Travelling', icon: Car },
+  { key: 'sleep', label: 'Night Sleep', icon: Moon },
+];
 
 export default function ComfortPage() {
-  const [activeTab, setActiveTab] = useState<'positions' | 'breathing' | 'warmth'>('positions');
+  const [activeSituation, setActiveSituation] = useState<SituationKey>('bed');
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathPhase, setBreathPhase] = useState<'Inhale' | 'Hold' | 'Exhale'>('Inhale');
 
-  const positions = [
-    {
-      id: 'fetal-curl',
-      title: 'Supported Side Fetal Curl',
-      subtitle: 'Gentle pressure relief for pelvic muscles',
-      description: 'Lie on your side with knees tucked toward your chest. Place a soft pillow between your knees and a second pillow tucked against your abdomen for gentle support.',
-      pillowTip: 'Place a medium pillow between knees to align your hips and spine.',
-      guidance: 'Try for as long as feels good to you. Take deep, slow breaths.',
-      icon: '🛋️',
-    },
-    {
-      id: 'legs-up-wall',
-      title: 'Legs-Up-the-Wall (Viparita Karani)',
-      subtitle: 'Soothes lower back and encourages circulation',
-      description: 'Lie flat on your back near a wall and extend your legs straight up against the wall. Keep your arms relaxed at your sides with palms facing up.',
-      pillowTip: 'Place a folded blanket or thin pillow underneath your lower back.',
-      guidance: 'Relax in this pose for as long as comfortable. Excellent for low energy.',
-      icon: '🧘‍♀️',
-    },
-    {
-      id: 'child-pose',
-      title: 'Wide-Knee Child’s Pose',
-      subtitle: 'Eases lower back tightness and pelvic tension',
-      description: 'Kneel on a soft surface with big toes touching and knees wide apart. Fold your torso forward and rest your forehead gently on a pillow.',
-      pillowTip: 'Place a large bolster or two pillows under your chest for complete support.',
-      guidance: 'Hold for as long as comfortable. Focus on expanding your lower back as you breathe.',
-      icon: '🌸',
-    },
-    {
-      id: 'knee-to-chest',
-      title: 'Single Knee-to-Chest Stretch',
-      subtitle: 'Gentle abdominal decompression',
-      description: 'Lie on your back, gently draw one knee toward your chest while keeping the other leg extended or bent comfortably.',
-      pillowTip: 'Rest your head on a soft pillow to keep your neck relaxed.',
-      guidance: 'Switch sides after taking 5 deep breaths, or stay as long as feels good.',
-      icon: '✨',
-    },
-    {
-      id: 'supported-recline',
-      title: 'Supported Butterfly Recline',
-      subtitle: 'Opens inner thighs and pelvic area',
-      description: 'Lie back on a stack of pillows supporting your upper back. Bring the soles of your feet together and let your knees open gently outward.',
-      pillowTip: 'Place pillows under both outer knees so your legs are fully supported without straining.',
-      guidance: 'Rest here for as long as comfortable.',
-      icon: '🛋️',
-    },
-  ];
+  const filteredPositions = positions.filter((p) => p.situation === activeSituation);
 
   return (
-    <div className="space-y-8 pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
-            <Sparkles className="w-6 h-6 text-primary" />
-            <span>Comfort Positions & Soothing Zone</span>
-          </h1>
-          <p className="text-sm text-muted-fg mt-1">
-            Restful body positions you may find comfortable during your cycle.
-          </p>
-        </div>
-
-        {/* Tab Buttons */}
-        <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-2xl border border-border text-xs self-start sm:self-auto">
-          <button
-            onClick={() => setActiveTab('positions')}
-            className={`px-3.5 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
-              activeTab === 'positions' ? 'bg-primary text-primary-fg shadow-soft' : 'text-muted-fg hover:text-foreground'
-            }`}
-          >
-            Positions
-          </button>
-          <button
-            onClick={() => setActiveTab('breathing')}
-            className={`px-3.5 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
-              activeTab === 'breathing' ? 'bg-primary text-primary-fg shadow-soft' : 'text-muted-fg hover:text-foreground'
-            }`}
-          >
-            Calm Breathing
-          </button>
-          <button
-            onClick={() => setActiveTab('warmth')}
-            className={`px-3.5 py-1.5 rounded-xl font-semibold transition-all cursor-pointer ${
-              activeTab === 'warmth' ? 'bg-primary text-primary-fg shadow-soft' : 'text-muted-fg hover:text-foreground'
-            }`}
-          >
-            Warm Compress Guidelines
-          </button>
-        </div>
+    <div className="space-y-8 pb-12 max-w-4xl mx-auto">
+      {/* Page Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <span>Comfort Positions</span>
+        </h1>
+        <p className="text-sm text-muted-fg">
+          Restful body positions tailored to where you are right now. Try any position that feels soothing for your body.
+        </p>
       </div>
 
-      {activeTab === 'positions' && (
-        <div className="space-y-6">
-          <div className="card-depth-primary p-6 sm:p-7 relative overflow-hidden">
-            <ThemeCornerDecor size="md" className="top-0 right-0" />
-            <div className="space-y-2">
-              <ThemeBadge>
-                <Heart className="w-3.5 h-3.5 fill-current" /> Gentle Body Rest
-              </ThemeBadge>
-              <h2 className="text-lg font-bold text-foreground">Positions You May Find Comfortable</h2>
-              <p className="text-xs text-muted-fg max-w-2xl leading-relaxed">
-                Every body is unique. Listen to your body and try these positions with supportive pillows for as long as feels good to you.
-              </p>
+      {/* Situation Selector Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+        {situations.map((sit) => {
+          const Icon = sit.icon;
+          const isActive = activeSituation === sit.key;
+          return (
+            <button
+              key={sit.key}
+              onClick={() => setActiveSituation(sit.key)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[44px] ${
+                isActive
+                  ? 'bg-primary text-primary-fg shadow-soft font-bold'
+                  : 'bg-muted/40 hover:bg-muted text-foreground border border-border/70'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{sit.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Positions Grid */}
+      <div className="space-y-4">
+        {filteredPositions.map((pos) => (
+          <div
+            key={pos.id}
+            className="p-5 sm:p-6 rounded-3xl border border-border bg-card/60 backdrop-blur-sm space-y-3"
+          >
+            <div>
+              <h2 className="text-base font-bold text-foreground">{pos.title}</h2>
+              <p className="text-xs text-primary font-medium mt-0.5">{pos.subtitle}</p>
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {positions.map((pos) => (
-              <div key={pos.id} className="card-depth-secondary p-6 space-y-4 relative overflow-hidden flex flex-col justify-between">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-primary-soft text-primary flex items-center justify-center text-2xl shadow-soft">
-                      {pos.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-base font-bold text-foreground">{pos.title}</h3>
-                      <p className="text-xs text-primary font-medium">{pos.subtitle}</p>
-                    </div>
-                  </div>
+            <p className="text-xs text-muted-fg leading-relaxed">
+              {pos.description}
+            </p>
 
-                  <p className="text-xs text-muted-fg leading-relaxed">
-                    {pos.description}
-                  </p>
+            <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 text-xs text-foreground space-y-1">
+              <span className="font-semibold text-primary block">Pillow & Cushion Tip:</span>
+              <p className="text-muted-fg text-[11px] leading-relaxed">{pos.cushionTip}</p>
+            </div>
 
-                  <div className="p-3 rounded-2xl bg-muted/40 border border-border/70 text-xs space-y-1">
-                    <span className="font-bold text-foreground block">Pillow Tip:</span>
-                    <p className="text-muted-fg">{pos.pillowTip}</p>
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-border/50 text-[11px] text-primary font-semibold italic">
-                  {pos.guidance}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'breathing' && (
-        <div className="card-depth-primary p-8 text-center rounded-4xl space-y-6 max-w-xl mx-auto relative overflow-hidden">
-          <ThemeCornerDecor size="lg" className="top-0 right-0" />
-          <div className="w-16 h-16 rounded-3xl bg-primary-soft text-primary flex items-center justify-center text-3xl mx-auto shadow-soft animate-gentle-pulse">
-            <Wind className="w-8 h-8" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold text-foreground">4-7-8 Soothing Breath</h2>
-            <p className="text-xs text-muted-fg max-w-md mx-auto leading-relaxed">
-              Deep, slow breathing helps relax smooth pelvic muscles and calms your nervous system.
+            <p className="text-[11px] text-muted-fg/90 italic pt-1">
+              {pos.gentleGuidance}
             </p>
           </div>
+        ))}
+      </div>
 
-          <div className="py-8">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-primary-soft to-accent/40 border-4 border-primary text-primary flex items-center justify-center text-lg font-bold mx-auto shadow-elevated animate-pulse">
-              {breathPhase}
-            </div>
+      {/* Mindful Breathing Pocket */}
+      <div className="p-5 sm:p-6 rounded-3xl border border-border/80 bg-muted/20 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Wind className="w-4 h-4 text-primary" />
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Gentle Belly Breathing
+            </h3>
           </div>
-
-          <p className="text-xs text-muted-fg italic">
-            Inhale quietly through your nose for 4 seconds, hold gently for 7 seconds, exhale completely through your mouth for 8 seconds.
-          </p>
+          <button
+            onClick={() => setBreathingActive(!breathingActive)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              breathingActive
+                ? 'bg-primary text-primary-fg shadow-soft'
+                : 'bg-muted/70 text-foreground hover:bg-muted border border-border'
+            }`}
+          >
+            {breathingActive ? 'Stop' : 'Start 4-4-4 Rhythm'}
+          </button>
         </div>
-      )}
 
-      {activeTab === 'warmth' && (
-        <div className="space-y-6">
-          <div className="card-depth-secondary p-6 sm:p-7 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold">
-                <Flame className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">Warm Compress & Heating Pad Tips</h3>
-                <p className="text-xs text-muted-fg">Safe, gentle warmth for lower abdomen and back</p>
-              </div>
+        <p className="text-xs text-muted-fg leading-relaxed">
+          Slow, diaphragmatic breathing gently massages the abdominal organs and helps down-regulate pain sensitivity.
+        </p>
+
+        {breathingActive && (
+          <div className="py-6 text-center space-y-2">
+            <div className="w-16 h-16 rounded-full bg-primary/20 text-primary flex items-center justify-center mx-auto text-xs font-bold animate-pulse">
+              Breathe
             </div>
-
-            <ul className="text-xs text-muted-fg space-y-2.5 leading-relaxed">
-              <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span>Place a soft towel or cloth layer between your skin and heating pad.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span>Use low to moderate warmth for 15–20 minutes at a time while resting.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                <span>Never fall asleep with an electric heating pad turned on.</span>
-              </li>
-            </ul>
+            <p className="text-xs text-muted-fg">Inhale for 4s • Hold for 4s • Exhale for 4s</p>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Non-medical Guidance Notice */}
+      <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 text-[11px] text-muted-fg leading-relaxed">
+        <p>
+          These comfort positions are gentle relaxation suggestions based on ergonomic body support. They are not medical treatments. If a position causes any sharp or sudden discomfort, immediately return to your natural posture.
+        </p>
+      </div>
     </div>
   );
 }

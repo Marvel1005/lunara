@@ -1,43 +1,21 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTheme } from '@/providers/theme-provider';
 import { useCycleSummary } from '@/lib/hooks/use-cycle';
-import { Moon, Sun, Sparkles, Heart } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/providers/auth-provider';
+import { Sparkles, Heart } from 'lucide-react';
 
 interface HeaderProps {
   userName?: string;
 }
 
 export function Header({ userName: initialName }: HeaderProps) {
-  const { themeStyle, isComfortMode, autoComfortMode, setAutoComfortMode } = useTheme();
+  const { isComfortMode, autoComfortMode, setAutoComfortMode } = useTheme();
   const { cycleSummary } = useCycleSummary();
-  const [userName, setUserName] = useState<string>(initialName || 'Elena');
+  const { userName: authUserName } = useAuth();
 
-  useEffect(() => {
-    async function loadUser() {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const name = user.user_metadata?.name || user.email?.split('@')[0];
-          if (name) setUserName(name);
-
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', user.id)
-            .single();
-
-          if (profile?.name) setUserName(profile.name);
-        }
-      } catch (err) {
-        console.error('Error fetching header user:', err);
-      }
-    }
-    loadUser();
-  }, []);
+  const userName = initialName || authUserName || 'there';
 
   const phaseLabel = cycleSummary.isPeriod
     ? `Period Day ${cycleSummary.periodDay || 1}`
@@ -52,10 +30,12 @@ export function Header({ userName: initialName }: HeaderProps) {
             <span className="text-xl font-bold tracking-tight text-primary">Lunara</span>
             <span className="text-xs">🌙</span>
           </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-primary-soft text-primary text-xs font-medium border border-border">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{phaseLabel}</span>
-          </div>
+          {cycleSummary.hasCycleData && (
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-primary-soft text-primary text-xs font-medium border border-border">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{phaseLabel}</span>
+            </div>
+          )}
         </div>
 
         {/* Right Actions */}
@@ -78,7 +58,7 @@ export function Header({ userName: initialName }: HeaderProps) {
 
           {/* User Profile Avatar */}
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-xs font-bold text-primary-fg shadow-soft border border-white">
-            {userName.charAt(0)}
+            {userName.charAt(0).toUpperCase()}
           </div>
         </div>
       </div>

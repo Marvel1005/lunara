@@ -5,7 +5,6 @@ import { PartnerSettings } from '@/components/partner/partner-settings';
 import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import { usePartnerViewConnections, useSharedPartnerStatus } from '@/lib/hooks/use-partner';
 import { PartnerDashboard } from '@/components/partner/partner-dashboard';
-import { ThemeCornerDecor, ThemeBadge } from '@/components/theme/theme-decorations';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 function PartnerView() {
@@ -41,15 +40,12 @@ export default function PartnerSupportPage() {
     <main className="min-h-screen bg-background">
       <div className="max-w-xl mx-auto px-4 py-6 pb-28 space-y-8">
         {/* Page header */}
-        <div className="card-depth-primary p-6 relative overflow-hidden space-y-2">
-          <ThemeCornerDecor size="md" className="top-0 right-0" />
+        <div className="space-y-1 pt-2 pb-2">
           <div className="flex items-center gap-2">
-            <ThemeBadge>
-              <Heart className="w-3.5 h-3.5 fill-current" /> Partner Support
-            </ThemeBadge>
+            <Heart className="w-5 h-5 text-primary fill-primary/20" />
+            <h1 className="text-2xl font-bold text-foreground">Partner Comfort Sharing</h1>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Partner Comfort Sharing</h1>
-          <p className="text-xs text-muted-fg leading-relaxed">
+          <p className="text-sm text-muted-fg leading-relaxed">
             Share gentle cycle status updates with a trusted partner so they know how to support you best.
           </p>
         </div>

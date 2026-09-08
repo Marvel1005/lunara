@@ -20,8 +20,8 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set({ name, value, ...options })
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
             request,
@@ -38,25 +38,43 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/signup');
-  const isProtectedPage = request.nextUrl.pathname.startsWith('/dashboard') ||
-                          request.nextUrl.pathname.startsWith('/calendar') ||
-                          request.nextUrl.pathname.startsWith('/relief') ||
-                          request.nextUrl.pathname.startsWith('/comfort') ||
-                          request.nextUrl.pathname.startsWith('/insights') ||
-                          request.nextUrl.pathname.startsWith('/journal') ||
-                          request.nextUrl.pathname.startsWith('/settings');
+  const pathname = request.nextUrl.pathname;
 
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup');
+  const isProtectedPage =
+    pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/calendar') ||
+    pathname.startsWith('/pain') ||
+    pathname.startsWith('/relief') ||
+    pathname.startsWith('/comfort') ||
+    pathname.startsWith('/insights') ||
+    pathname.startsWith('/journal') ||
+    pathname.startsWith('/movies') ||
+    pathname.startsWith('/partner-support') ||
+    pathname.startsWith('/settings');
+
+  // 1. Unauthenticated users attempting to access protected routes -> Redirect to login preserving destination
   if (!user && isProtectedPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
-    return NextResponse.redirect(url);
+    url.searchParams.set('redirectTo', pathname + request.nextUrl.search);
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      redirectResponse.cookies.set(c.name, c.value);
+    });
+    return redirectResponse;
   }
 
+  // 2. Authenticated users attempting to access login/signup -> Redirect to redirectTo or dashboard
   if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
-    return NextResponse.redirect(url);
+    const redirectTo = request.nextUrl.searchParams.get('redirectTo');
+    const validRedirect = redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//');
+    const url = new URL(validRedirect ? redirectTo : '/dashboard', request.url);
+    const redirectResponse = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      redirectResponse.cookies.set(c.name, c.value);
+    });
+    return redirectResponse;
   }
 
   return supabaseResponse;

@@ -136,20 +136,28 @@ function PartnerAcceptContent() {
               </div>
               <div className="space-y-2 pt-2">
                 {errorMessage?.includes('signed in') ? (
-                  <Link
-                    href={`/login${rawToken ? `?redirectTo=${encodeURIComponent(`/partner/accept?token=${rawToken}`)}` : ''}`}
-                    className="block w-full py-3 rounded-2xl bg-primary text-primary-fg text-sm font-semibold hover:opacity-90 transition-opacity"
-                  >
-                    Sign In to Accept
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      href={`/login${rawToken ? `?redirectTo=${encodeURIComponent(`/partner/accept?token=${rawToken}`)}` : ''}`}
+                      className="block w-full py-3 rounded-2xl bg-primary text-primary-fg text-sm font-semibold hover:opacity-90 transition-opacity"
+                    >
+                      Sign In to Accept
+                    </Link>
+                    <Link
+                      href={`/signup${rawToken ? `?redirectTo=${encodeURIComponent(`/partner/accept?token=${rawToken}`)}` : ''}`}
+                      className="block w-full py-2.5 rounded-2xl bg-muted/60 border border-border text-foreground text-xs font-semibold hover:bg-muted transition-colors"
+                    >
+                      New to Lunara? Create Account
+                    </Link>
+                  </div>
                 ) : null}
                 <Link
                   href="/dashboard"
                   className={`block w-full py-3 rounded-2xl ${
                     errorMessage?.includes('signed in')
-                      ? 'bg-muted text-foreground hover:bg-muted/80'
+                      ? 'bg-muted/40 text-muted-fg hover:text-foreground'
                       : 'bg-primary text-primary-fg hover:opacity-90'
-                  } text-sm font-semibold transition-opacity`}
+                  } text-xs font-semibold transition-opacity`}
                 >
                   Go to Dashboard
                 </Link>

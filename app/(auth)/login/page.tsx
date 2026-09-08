@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { LogIn, AlertCircle } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams?.get('redirectTo');
+  const validTarget =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
+      ? redirectTo
+      : '/dashboard';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,13 +35,13 @@ export default function LoginPage() {
       if (authError) {
         if (authError.message.toLowerCase().includes('invalid login credentials')) {
           setError(
-            'Invalid login credentials. Please check your email and password. If you recently registered, please verify your email address via the confirmation link sent by Supabase.'
+            'Invalid email or password. If you recently registered, please check your inbox for the Supabase confirmation link.'
           );
         } else {
           setError(authError.message);
         }
       } else {
-        router.push('/dashboard');
+        router.push(validTarget);
         router.refresh();
       }
     } catch (err: unknown) {
@@ -110,11 +117,22 @@ export default function LoginPage() {
       <div className="mt-6 text-center pt-4 border-t border-border/50">
         <p className="text-xs text-muted-fg">
           New to Lunara?{' '}
-          <Link href="/signup" className="font-semibold text-primary hover:underline">
+          <Link
+            href={`/signup${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`}
+            className="font-semibold text-primary hover:underline"
+          >
             Create an account
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="py-8 text-center text-xs text-muted-fg">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

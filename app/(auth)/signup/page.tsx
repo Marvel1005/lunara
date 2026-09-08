@@ -1,13 +1,20 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { UserPlus, AlertCircle, CheckCircle2, Mail } from 'lucide-react';
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams?.get('redirectTo');
+  const validTarget =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
+      ? redirectTo
+      : '/dashboard';
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -35,18 +42,18 @@ export default function SignUpPage() {
 
       if (authError) {
         if (authError.message.includes('rate limit') || authError.status === 429) {
-          setError('Supabase email rate limit reached. Please wait a few minutes before trying again or contact administrator.');
+          setError('Supabase email rate limit reached. Please wait a few moments before trying again.');
         } else {
           setError(authError.message);
         }
       } else if (data.session) {
-        // Autoconfirm is enabled on Supabase project, user has active session
-        router.push('/dashboard');
+        // Autoconfirm is enabled or active session established
+        router.push(validTarget);
         router.refresh();
       } else if (data.user) {
-        // User created, but email confirmation is required by Supabase
+        // Email confirmation is required by Supabase project
         setInfoMessage(
-          `Account created for ${email}! Supabase requires email verification. Please check your email inbox to confirm your account, then sign in.`
+          `Account created for ${email}! Please check your email to confirm your account, then sign in.`
         );
       }
     } catch (err: unknown) {
@@ -78,13 +85,13 @@ export default function SignUpPage() {
         <div className="mb-4 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs space-y-2">
           <div className="flex items-center gap-2 font-semibold text-emerald-900">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-            <span>Account Created on Supabase</span>
+            <span>Account Created</span>
           </div>
           <p>{infoMessage}</p>
           <div className="pt-2">
             <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-700 text-white font-semibold text-xs hover:bg-emerald-800 transition-all"
+              href={`/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 text-white font-semibold text-xs hover:bg-emerald-800 transition-all"
             >
               <Mail className="w-3.5 h-3.5" />
               <span>Go to Sign In</span>
@@ -158,11 +165,22 @@ export default function SignUpPage() {
       <div className="mt-6 text-center pt-4 border-t border-border/50">
         <p className="text-xs text-muted-fg">
           Already have an account?{' '}
-          <Link href="/login" className="font-semibold text-primary hover:underline">
+          <Link
+            href={`/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`}
+            className="font-semibold text-primary hover:underline"
+          >
             Sign in
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="py-8 text-center text-xs text-muted-fg">Loading...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }
