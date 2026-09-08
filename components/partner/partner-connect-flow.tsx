@@ -43,50 +43,51 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (!session?.access_token) {
+      if (!session?.user) {
         setError('You must be signed in to create an invitation.');
         setStep('error');
         return;
       }
 
-      // Invoke Supabase Edge Function (server-side secure RPC invocation)
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/send-partner-invitation`,
+      // Invoke Supabase Edge Function (send-partner-invitation)
+      const { data, error: invokeError } = await supabase.functions.invoke(
+        'send-partner-invitation',
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          body: {
+            email: partnerEmail.trim().toLowerCase(),
+            partnerName: partnerName.trim() || null,
           },
-          body: JSON.stringify({
-            invitee_email: partnerEmail.trim(),
-            partner_name: partnerName.trim() || undefined,
-          }),
         }
       );
 
-      const data = await response.json();
+      // Even if email delivery failed (status 502), the invitation DB record was created
+      // and invitationUrl is returned for direct link sharing.
+      const generatedUrl = data?.invitationUrl || (data as Record<string, unknown>)?.invitation_url as string | undefined;
 
-      if (!response.ok || !data.success) {
-        setError(data?.error ?? "Couldn't create the invitation right now. Please try again.");
+      if (invokeError && !generatedUrl) {
+        console.error('send-partner-invitation error:', invokeError);
+        setError(
+          data?.error ||
+          invokeError.message ||
+          "Couldn't create the invitation right now. Please try again."
+        );
         setStep('error');
         return;
       }
 
-      // Edge Function returns secure invitation URL directly to the authorized inviter
-      const generatedUrl =
-        data.invitation_url ||
-        `${window.location.origin}/partner/accept?token=${data.raw_token}`;
+      if (generatedUrl) {
+        setInvitationUrl(generatedUrl);
+        setEmailSent(Boolean(data?.emailSent ?? (data as Record<string, unknown>)?.email_sent));
 
-      setInvitationUrl(generatedUrl);
-      setEmailSent(Boolean(data.email_sent));
-
-      // Refresh partner connections so inviter sees updated status
-      queryClient.invalidateQueries({ queryKey: ['partner_connections'] });
-      setStep('ready');
-    } catch {
+        // Refresh partner connections so inviter sees updated status
+        queryClient.invalidateQueries({ queryKey: ['partner_connections'] });
+        setStep('ready');
+      } else {
+        setError(data?.error ?? "Couldn't create the invitation right now. Please try again.");
+        setStep('error');
+      }
+    } catch (err) {
+      console.error('Network error during partner invitation:', err);
       setError('Network error contacting invitation service. Please try again.');
       setStep('error');
     }

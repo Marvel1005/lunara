@@ -159,7 +159,7 @@ export default function MoviesPage() {
   });
 
   return (
-    <div className="space-y-8 pb-12 max-w-4xl mx-auto">
+    <div className="space-y-5 pb-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">

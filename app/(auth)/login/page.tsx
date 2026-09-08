@@ -46,7 +46,11 @@ function LoginForm() {
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.toLowerCase().includes('failed to fetch')) {
+          setError('Unable to reach the server. Please check your internet connection and try again.');
+        } else {
+          setError(err.message);
+        }
       } else {
         setError('An unexpected login error occurred. Please try again.');
       }

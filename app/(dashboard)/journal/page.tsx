@@ -162,7 +162,7 @@ export default function JournalPage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-5 pb-10 max-w-3xl mx-auto">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

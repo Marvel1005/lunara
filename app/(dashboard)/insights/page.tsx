@@ -48,7 +48,7 @@ export default function InsightsPage() {
   const topPainLocation = Object.entries(locationCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-5 pb-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

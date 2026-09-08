@@ -112,7 +112,7 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-0 sm:p-4 overflow-y-auto">
-      <div className="bg-background w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-4xl shadow-comfort border border-border flex flex-col justify-between p-5 sm:p-7 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-background w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-2xl shadow-comfort border border-border flex flex-col justify-between p-5 sm:p-6 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">

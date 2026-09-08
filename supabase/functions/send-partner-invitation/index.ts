@@ -1,290 +1,319 @@
-// supabase/functions/send-partner-invitation/index.ts
-// Supabase Edge Function — runs on Deno, uses SMTP for email delivery.
-// Configure SMTP via Supabase Dashboard → Project Settings → Edge Functions → Secrets:
-//   SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, EMAIL_FROM, NEXT_PUBLIC_APP_URL
+import { withSupabase } from "npm:@supabase/server@^1";
+import nodemailer from "npm:nodemailer@^9";
 
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts';
+const APP_URL = Deno.env.get("LUNARA_APP_URL");
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const GMAIL_USER = Deno.env.get("GMAIL_USER");
+const GMAIL_APP_PASSWORD = Deno.env.get("GMAIL_APP_PASSWORD");
 
-// ─── Email HTML Builder ────────────────────────────────────────────────────────
-function buildInvitationEmail(params: {
-  inviteeLinkUrl: string;
-  partnerName: string;
-  expiresAt: string;
-}): string {
-  const expiryDate = new Date(params.expiresAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+const SMTP_HOST = "smtp.gmail.com";
+const SMTP_PORT = 465;
 
-  return `<!DOCTYPE html>
-<html lang="en">
+if (!APP_URL) {
+  console.error("Missing LUNARA_APP_URL secret");
+}
+
+if (!GMAIL_USER) {
+  console.error("Missing GMAIL_USER secret");
+}
+
+if (!GMAIL_APP_PASSWORD) {
+  console.error("Missing GMAIL_APP_PASSWORD secret");
+}
+
+const transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: true,
+  auth: {
+    user: GMAIL_USER,
+    pass: GMAIL_APP_PASSWORD,
+  },
+});
+
+export default {
+  fetch: withSupabase(
+    { auth: "user" },
+    async (req, ctx) => {
+      if (req.method !== "POST") {
+        return Response.json(
+          { error: "Method not allowed" },
+          { status: 405 }
+        );
+      }
+
+      try {
+        const body = await req.json();
+
+        const email =
+          typeof body.email === "string"
+            ? body.email.trim().toLowerCase()
+            : "";
+
+        const partnerName =
+          typeof body.partnerName === "string"
+            ? body.partnerName.trim()
+            : null;
+
+        if (!email) {
+          return Response.json(
+            { error: "Partner email is required" },
+            { status: 400 }
+          );
+        }
+
+        if (!APP_URL) {
+          return Response.json(
+            { error: "Lunara app URL is not configured" },
+            { status: 500 }
+          );
+        }
+
+        if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
+          return Response.json(
+            { error: "Email service is not configured" },
+            { status: 500 }
+          );
+        }
+
+        // ------------------------------------------------------------
+        // 1. Create the secure invitation using Lunara's existing RPC
+        // ------------------------------------------------------------
+
+        const { data: invitation, error: invitationError } =
+          await ctx.supabase.rpc("create_partner_invitation", {
+            p_invitee_email: email,
+            p_partner_name: partnerName,
+          });
+
+        if (invitationError) {
+          console.error(
+            "create_partner_invitation failed:",
+            invitationError.message
+          );
+
+          return Response.json(
+            {
+              error: invitationError.message,
+            },
+            { status: 400 }
+          );
+        }
+
+        if (!invitation?.raw_token) {
+          console.error("Invitation RPC did not return raw_token");
+
+          return Response.json(
+            {
+              error: "Invitation could not be created",
+            },
+            { status: 500 }
+          );
+        }
+
+        // ------------------------------------------------------------
+        // 2. Build the invitation URL
+        // ------------------------------------------------------------
+
+        const invitationUrl =
+          `${APP_URL.replace(/\/$/, "")}/partner/accept?token=` +
+          encodeURIComponent(invitation.raw_token);
+
+        // ------------------------------------------------------------
+        // 3. Send invitation through Gmail SMTP
+        // ------------------------------------------------------------
+
+        const displayName = partnerName || "there";
+
+        const html = `
+<!DOCTYPE html>
+<html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're invited to support someone on Lunara</title>
+  <title>Lunara Partner Invitation</title>
 </head>
-<body style="margin:0;padding:0;background-color:#FDFBF7;font-family:'Inter',Arial,sans-serif;color:#2D2628;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#FDFBF7;padding:32px 16px;">
-    <tr>
-      <td align="center">
-        <table width="100%" style="max-width:520px;background-color:#FFFFFF;border-radius:24px;border:1px solid #EFE8DF;overflow:hidden;">
 
-          <!-- Header -->
-          <tr>
-            <td style="background:linear-gradient(135deg,#FAF7F2,#F6ECEE);padding:32px 40px 24px;text-align:center;">
-              <div style="font-size:32px;margin-bottom:8px;">🌙</div>
-              <p style="margin:0;font-size:22px;font-weight:700;color:#2D2628;letter-spacing:-0.5px;">Lunara</p>
-              <p style="margin:4px 0 0;font-size:13px;color:#7A6F73;">Your cycle. Your comfort.</p>
-            </td>
-          </tr>
+<body style="
+  margin: 0;
+  padding: 0;
+  background: #f7f4f1;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #2f2925;
+">
+  <div style="
+    max-width: 600px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 40px 32px;
+    box-sizing: border-box;
+  ">
 
-          <!-- Body -->
-          <tr>
-            <td style="padding:36px 40px;">
-              <h1 style="margin:0 0 16px;font-size:20px;font-weight:700;color:#2D2628;line-height:1.3;">
-                ${params.partnerName ? `${params.partnerName} has` : 'Someone has'} invited you to support them on Lunara
-              </h1>
+    <h1 style="
+      margin: 0 0 20px;
+      font-size: 28px;
+      color: #6f5144;
+    ">
+      You're invited to Lunara
+    </h1>
 
-              <p style="margin:0 0 20px;font-size:14px;color:#7A6F73;line-height:1.7;">
-                Lunara is a private wellness companion that helps people understand and manage their menstrual cycle and comfort.
-              </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Hi ${escapeHtml(displayName)},
+    </p>
 
-              <p style="margin:0 0 20px;font-size:14px;color:#7A6F73;line-height:1.7;">
-                Your partner has chosen to invite you so you can offer support on harder days — like knowing when they might need a little more patience, a warm drink, or just some quiet company.
-              </p>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Someone has invited you to connect with them as a partner
+      on Lunara.
+    </p>
 
-              <!-- What this means card -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F6ECEE;border-radius:16px;margin-bottom:28px;">
-                <tr>
-                  <td style="padding:20px 24px;">
-                    <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#2D2628;">What connecting means</p>
-                    <p style="margin:0 0 8px;font-size:13px;color:#6B555B;">✓ &nbsp;Connecting is completely voluntary.</p>
-                    <p style="margin:0 0 8px;font-size:13px;color:#6B555B;">✓ &nbsp;You only see information they choose to share.</p>
-                    <p style="margin:0 0 8px;font-size:13px;color:#6B555B;">✓ &nbsp;They can change or revoke access at any time.</p>
-                    <p style="margin:0;font-size:13px;color:#6B555B;">✓ &nbsp;No private health information is in this email.</p>
-                  </td>
-                </tr>
-              </table>
+    <p style="font-size: 16px; line-height: 1.6;">
+      Lunara lets the person inviting you choose exactly what
+      wellness information they want to share with you.
+      Nothing is shared unless they explicitly allow it.
+    </p>
 
-              <!-- CTA Button -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
-                <tr>
-                  <td align="center">
-                    <a href="${params.inviteeLinkUrl}" style="display:inline-block;padding:16px 36px;background-color:#C08594;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:16px;letter-spacing:0.2px;">
-                      Accept Partner Invitation
-                    </a>
-                  </td>
-                </tr>
-              </table>
+    <div style="text-align: center; margin: 32px 0;">
+      <a
+        href="${escapeHtml(invitationUrl)}"
+        style="
+          display: inline-block;
+          padding: 14px 24px;
+          background: #6f5144;
+          color: #ffffff;
+          text-decoration: none;
+          border-radius: 10px;
+          font-weight: 600;
+        "
+      >
+        Accept Lunara Invitation
+      </a>
+    </div>
 
-              <p style="margin:0 0 8px;font-size:12px;color:#9C8E92;text-align:center;">
-                This invitation expires on <strong>${expiryDate}</strong> and can only be used once.
-              </p>
-              <p style="margin:0 0 24px;font-size:12px;color:#9C8E92;text-align:center;">
-                You will need to sign in to Lunara with the email address this invitation was sent to.
-              </p>
+    <p style="
+      font-size: 13px;
+      line-height: 1.5;
+      color: #766d68;
+    ">
+      This invitation expires in 7 days and can only be accepted
+      by the email address it was sent to.
+    </p>
 
-              <!-- Link fallback -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F3F0;border-radius:12px;">
-                <tr>
-                  <td style="padding:16px 20px;">
-                    <p style="margin:0 0 8px;font-size:12px;font-weight:600;color:#5A5056;">If the button above doesn't work, copy this link:</p>
-                    <p style="margin:0;font-size:11px;color:#9C8E92;word-break:break-all;">${params.inviteeLinkUrl}</p>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+    <p style="
+      font-size: 13px;
+      line-height: 1.5;
+      color: #766d68;
+      word-break: break-all;
+    ">
+      If the button doesn't work, open this link:
+      <br />
+      ${escapeHtml(invitationUrl)}
+    </p>
 
-          <!-- Footer -->
-          <tr>
-            <td style="padding:20px 40px 28px;border-top:1px solid #EFE8DF;">
-              <p style="margin:0;font-size:11px;color:#B0A8AC;text-align:center;line-height:1.6;">
-                Lunara does not share any private health or cycle information in invitations.<br />
-                If you did not expect this invitation, you can safely ignore it. No account will be created on your behalf.
-              </p>
-            </td>
-          </tr>
+    <hr style="
+      border: none;
+      border-top: 1px solid #eee7e2;
+      margin: 32px 0;
+    " />
 
-        </table>
-      </td>
-    </tr>
-  </table>
+    <p style="
+      font-size: 12px;
+      color: #99918c;
+      margin: 0;
+    ">
+      This email was sent by Lunara because someone invited you
+      to Partner Support.
+    </p>
+
+  </div>
 </body>
-</html>`;
-}
+</html>
+`;
 
-// ─── Main Handler ──────────────────────────────────────────────────────────────
-serve(async (req: Request) => {
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
-  }
+        const text = `
+You're invited to connect on Lunara.
 
-  try {
-    // 1. Extract and verify the user's JWT from the Authorization header
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized. Missing token.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+Hi ${displayName},
 
-    // 2. Create a Supabase client scoped to the user's JWT (respects RLS)
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-      auth: { persistSession: false },
-    });
+Someone has invited you to connect with them as a partner on Lunara.
 
-    // Verify user is authenticated
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized. Please sign in.' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+Accept the invitation here:
 
-    // 3. Parse request body
-    const body = await req.json();
-    const { invitee_email, partner_name } = body as {
-      invitee_email?: string;
-      partner_name?: string;
-    };
+${invitationUrl}
 
-    if (!invitee_email || !invitee_email.includes('@') || invitee_email.trim().length < 5) {
-      return new Response(JSON.stringify({ error: 'Please provide a valid email address.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+This invitation expires in 7 days and can only be accepted by the email address it was sent to.
 
-    const cleanEmail = invitee_email.trim().toLowerCase();
-    const cleanPartnerName = partner_name?.trim() || null;
+Lunara lets the person inviting you choose exactly what wellness information they want to share.
+Nothing is shared unless they explicitly allow it.
+`;
 
-    // Prevent self-invitation
-    if (user.email && user.email.toLowerCase() === cleanEmail) {
-      return new Response(JSON.stringify({ error: 'You cannot invite yourself.' }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    // 4. Create invitation via RPC (enforces RLS + uniqueness constraints server-side)
-    const { data: rpcData, error: rpcError } = await supabase.rpc('create_partner_invitation', {
-      p_invitee_email: cleanEmail,
-      p_partner_name: cleanPartnerName,
-    });
-
-    if (rpcError || !rpcData) {
-      const msg = rpcError?.message || 'Failed to create partner invitation.';
-      if (msg.includes('already')) {
-        return new Response(
-          JSON.stringify({ error: 'This email is already connected or has a pending invite.' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      return new Response(JSON.stringify({ error: msg }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const { invitation_id, raw_token, expires_at } = rpcData as {
-      invitation_id: string;
-      raw_token: string;
-      expires_at: string;
-    };
-
-    // 5. Build the acceptance link for the authorized inviter
-    const appUrl = Deno.env.get('NEXT_PUBLIC_APP_URL') || 'http://localhost:3000';
-    const inviteeLinkUrl = `${appUrl}/partner/accept?token=${raw_token}`;
-
-    // 6. Optional Gmail SMTP delivery using Google App Password
-    // Secret names: GMAIL_USER, GMAIL_APP_PASSWORD (with backward-compatible SMTP_* fallbacks)
-    const gmailUser = Deno.env.get('GMAIL_USER') || Deno.env.get('SMTP_USERNAME');
-    const gmailAppPassword = Deno.env.get('GMAIL_APP_PASSWORD') || Deno.env.get('SMTP_PASSWORD');
-    const smtpHost = Deno.env.get('SMTP_HOST') || 'smtp.gmail.com';
-    const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '465');
-    const emailFrom = Deno.env.get('EMAIL_FROM') || (gmailUser ? `Lunara <${gmailUser}>` : undefined);
-
-    let emailSent = false;
-
-    if (gmailUser && gmailAppPassword) {
-      try {
-        const client = new SmtpClient();
-        if (smtpPort === 465) {
-          await client.connectTLS({
-            hostname: smtpHost,
-            port: smtpPort,
-            username: gmailUser,
-            password: gmailAppPassword,
+        try {
+          await transporter.sendMail({
+            from: `"Lunara" <${GMAIL_USER}>`,
+            to: email,
+            subject: "You're invited to connect on Lunara",
+            text,
+            html,
           });
-        } else {
-          await client.connect({
-            hostname: smtpHost,
-            port: smtpPort,
-          });
-          await client.startTLS({
-            hostname: smtpHost,
-            username: gmailUser,
-            password: gmailAppPassword,
-          });
+        } catch (emailError) {
+          console.error(
+            "Gmail SMTP failed:",
+            emailError instanceof Error
+              ? emailError.message
+              : "Unknown email error"
+          );
+
+          // IMPORTANT:
+          // Do NOT delete the invitation.
+          // The user can still copy/share this secure invitation URL.
+          return Response.json(
+            {
+              success: false,
+              emailSent: false,
+              invitationCreated: true,
+              invitationUrl,
+              message:
+                "Invitation created, but the email could not be sent. You can copy the invitation link and share it manually.",
+            },
+            { status: 502 }
+          );
         }
 
-        await client.send({
-          from: emailFrom || gmailUser,
-          to: cleanEmail,
-          subject: `${cleanPartnerName ? `${cleanPartnerName} wants` : 'Someone wants'} to support you on Lunara`,
-          html: buildInvitationEmail({
-            inviteeLinkUrl,
-            partnerName: cleanPartnerName || '',
-            expiresAt: expires_at,
-          }),
-        });
+        // ------------------------------------------------------------
+        // 4. Success
+        // ------------------------------------------------------------
 
-        await client.close();
-        emailSent = true;
-      } catch (smtpError) {
-        // Non-fatal: Gmail SMTP delivery failure must NOT destroy an otherwise valid invitation.
-        // We log a safe warning without exposing credentials or tokens, and keep the invitation active.
-        console.warn(
-          '[send-partner-invitation] Email delivery failed or unavailable. Falling back to secure link sharing.'
+        return Response.json({
+          success: true,
+          emailSent: true,
+          invitationCreated: true,
+          invitationId: invitation.invitation_id,
+          expiresAt: invitation.expires_at,
+          invitationUrl,
+        });
+      } catch (error) {
+        console.error(
+          "send-partner-invitation error:",
+          error instanceof Error ? error.message : "Unknown error"
         );
-        emailSent = false;
+
+        return Response.json(
+          {
+            error: "Unable to create or send the partner invitation",
+          },
+          { status: 500 }
+        );
       }
     }
+  ),
+};
 
-    // 7. Return usable invitation info to the authorized inviter
-    // Safe: Invitation URL contains token for the inviter to copy/share directly.
-    return new Response(
-      JSON.stringify({
-        success: true,
-        invitation_id,
-        invitation_url: inviteeLinkUrl,
-        expires_at,
-        email_sent: emailSent,
-      }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
-  } catch (err) {
-    console.error('[send-partner-invitation] Unexpected error:', err);
-    return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred.' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-  }
-});
+// Prevent HTML injection in partner name / URL output.
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}

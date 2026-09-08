@@ -3,7 +3,8 @@
 import React from 'react';
 import { useCycleSummary } from '@/lib/hooks/use-cycle';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
   Calendar,
@@ -14,6 +15,7 @@ import {
   Settings,
   Film,
   Heart,
+  LogOut,
 } from 'lucide-react';
 
 const mainNavItems = [
@@ -30,7 +32,19 @@ const mainNavItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { cycleSummary } = useCycleSummary();
+
+  const handleSignOut = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push('/login');
+      router.refresh();
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+  };
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border glass-panel p-5 justify-between select-none">
@@ -76,6 +90,15 @@ export function Sidebar() {
               </Link>
             );
           })}
+          {/* Simple Sign Out Button */}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 transition-all w-full text-left cursor-pointer mt-1"
+          >
+            <LogOut className="w-4 h-4 text-rose-500" />
+            <span>Sign Out</span>
+          </button>
         </nav>
       </div>
 

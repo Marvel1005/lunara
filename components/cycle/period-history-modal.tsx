@@ -46,7 +46,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="w-full max-w-lg glass-panel p-6 rounded-4xl shadow-comfort border border-white/60 text-foreground relative space-y-5 max-h-[85vh] flex flex-col">
+        <div className="w-full max-w-lg glass-panel p-5 rounded-2xl shadow-comfort border border-white/60 text-foreground relative space-y-4 max-h-[85vh] flex flex-col">
           <div className="flex items-center justify-between border-b border-border/60 pb-3 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-lunara-rose/30 flex items-center justify-center text-primary">

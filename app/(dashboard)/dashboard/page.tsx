@@ -92,7 +92,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-8 pb-12 max-w-4xl mx-auto">
+    <div className="space-y-5 pb-10 max-w-4xl mx-auto">
       {/* Modals */}
       <CycleSetupModal isOpen={isSetupOpen} onClose={() => setIsSetupOpen(false)} />
       <PeriodModal isOpen={isLogPeriodOpen} onClose={() => setIsLogPeriodOpen(false)} />

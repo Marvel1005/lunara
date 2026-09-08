@@ -109,7 +109,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-5 pb-10 max-w-4xl mx-auto">
       <PeriodModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

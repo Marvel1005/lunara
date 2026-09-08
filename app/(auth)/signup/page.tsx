@@ -58,7 +58,11 @@ function SignUpForm() {
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.toLowerCase().includes('failed to fetch')) {
+          setError('Unable to reach the server. Please check your internet connection and try again.');
+        } else {
+          setError(err.message);
+        }
       } else {
         setError('An unexpected registration error occurred.');
       }
@@ -111,7 +115,7 @@ function SignUpForm() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Elena"
+              placeholder="Your name"
               className="w-full px-4 py-2.5 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground"
             />
           </div>

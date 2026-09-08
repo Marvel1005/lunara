@@ -53,7 +53,17 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/partner-support') ||
     pathname.startsWith('/settings');
 
-  // 1. Unauthenticated users attempting to access protected routes -> Redirect to login preserving destination
+  // 1. Root route: redirect based on auth status
+  if (pathname === '/') {
+    const target = user ? '/dashboard' : '/login';
+    const redirectResponse = NextResponse.redirect(new URL(target, request.url));
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      redirectResponse.cookies.set(c.name, c.value);
+    });
+    return redirectResponse;
+  }
+
+  // 2. Unauthenticated users attempting to access protected routes -> Redirect to login preserving destination
   if (!user && isProtectedPage) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
