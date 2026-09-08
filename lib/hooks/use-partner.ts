@@ -14,6 +14,15 @@ import type {
 // PRIMARY USER HOOKS
 // ─────────────────────────────────────────────────────────────────────────────
 
+export interface PendingInvitation {
+  id: string;
+  invitee_email: string;
+  partner_name?: string | null;
+  status: string;
+  expires_at: string;
+  created_at: string;
+}
+
 export function useMyPartnerConnections() {
   const queryClient = useQueryClient();
   const supabase = createClient();
@@ -21,11 +30,49 @@ export function useMyPartnerConnections() {
   const query = useQuery<PartnerConnectionItem[]>({
     queryKey: ['partner_connections'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_my_partner_connections');
-      if (error) throw error;
-      return (data as { connections: PartnerConnectionItem[] })?.connections ?? [];
+      try {
+        const { data, error } = await supabase.rpc('get_my_partner_connections');
+        if (error) {
+          console.warn('get_my_partner_connections warning:', error.message);
+          return [];
+        }
+        return (data as { connections: PartnerConnectionItem[] })?.connections ?? [];
+      } catch (err) {
+        console.warn('get_my_partner_connections fetch error:', err);
+        return [];
+      }
     },
   });
+
+  // Query pending invitations sent by the current user
+  const pendingQuery = useQuery<PendingInvitation[]>({
+    queryKey: ['pending_partner_invitations'],
+    queryFn: async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+        const { data, error } = await supabase
+          .from('partner_invitations')
+          .select('id, invitee_email, partner_name, status, expires_at, created_at')
+          .eq('inviter_user_id', user.id)
+          .eq('status', 'pending')
+          .gt('expires_at', new Date().toISOString())
+          .order('created_at', { ascending: false });
+        if (error) {
+          console.warn('partner_invitations query warning:', error.message);
+          return [];
+        }
+        return (data as PendingInvitation[]) ?? [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['partner_connections'] });
+    queryClient.invalidateQueries({ queryKey: ['pending_partner_invitations'] });
+  };
 
   // Create invitation
   const createInvitationMutation = useMutation({
@@ -37,7 +84,7 @@ export function useMyPartnerConnections() {
       if (error) throw new Error(error.message);
       return data as CreateInvitationResult;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['partner_connections'] }),
+    onSuccess: invalidateAll,
   });
 
   // Cancel invitation
@@ -49,7 +96,7 @@ export function useMyPartnerConnections() {
       if (error) throw new Error(error.message);
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['partner_connections'] }),
+    onSuccess: invalidateAll,
   });
 
   // Update permissions
@@ -102,7 +149,7 @@ export function useMyPartnerConnections() {
       if (error) throw new Error(error.message);
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['partner_connections'] }),
+    onSuccess: invalidateAll,
   });
 
   // Revoke connection
@@ -114,7 +161,7 @@ export function useMyPartnerConnections() {
       if (error) throw new Error(error.message);
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['partner_connections'] }),
+    onSuccess: invalidateAll,
   });
 
   const activeConnection = query.data?.find((c) => c.status === 'active') ?? null;
@@ -126,9 +173,14 @@ export function useMyPartnerConnections() {
     activeConnection,
     pausedConnection,
     liveConnection,
+    pendingInvitations: pendingQuery.data ?? [],
+    isPendingLoading: pendingQuery.isLoading,
     isLoading: query.isLoading,
     isError: query.isError,
-    refetch: query.refetch,
+    refetch: () => {
+      query.refetch();
+      pendingQuery.refetch();
+    },
     createInvitation: createInvitationMutation.mutateAsync,
     isCreatingInvitation: createInvitationMutation.isPending,
     cancelInvitation: cancelInvitationMutation.mutateAsync,
@@ -191,20 +243,28 @@ export function usePartnerViewConnections() {
   return useQuery<{ connection_id: string; user_id: string; status: string }[]>({
     queryKey: ['partner_view_connections'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return [];
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('partner_connections')
-        .select('id, user_id, status')
-        .eq('partner_user_id', user.id);
+        const { data, error } = await supabase
+          .from('partner_connections')
+          .select('id, user_id, status')
+          .eq('partner_user_id', user.id);
 
-      if (error) throw error;
-      return (data ?? []).map((r) => ({
-        connection_id: r.id,
-        user_id: r.user_id,
-        status: r.status,
-      }));
+        if (error) {
+          console.warn('partner_view_connections warning:', error.message);
+          return [];
+        }
+        return (data ?? []).map((r) => ({
+          connection_id: r.id,
+          user_id: r.user_id,
+          status: r.status,
+        }));
+      } catch (err) {
+        console.warn('partner_view_connections fetch error:', err);
+        return [];
+      }
     },
   });
 }
