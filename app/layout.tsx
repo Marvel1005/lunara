@@ -8,6 +8,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lunara.vercel.app')
+  ),
   title: 'Lunara — Your cycle. Your comfort.',
   description: 'A premium personal menstrual-cycle and wellness companion.',
   icons: {

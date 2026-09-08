@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "allowScripts": {
+    "unrs-resolver": true
+  },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.109.0",
