@@ -603,10 +603,12 @@ export function PhoneOTPForm({ mode, heading, subheading, switchLink }: PhoneOTP
   // ── Phone step ───────────────────────────────────────────────────────────
   return (
     <div className="space-y-5">
-      <div className="space-y-1">
-        <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>
-        <p className="text-xs text-muted-fg">{subheading}</p>
-      </div>
+      {(heading || subheading) && (
+        <div className="space-y-1">
+          {heading && <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>}
+          {subheading && <p className="text-xs text-muted-fg">{subheading}</p>}
+        </div>
+      )}
 
       {error && (
         <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
