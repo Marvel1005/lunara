@@ -45,6 +45,48 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- 0. USER ONBOARDING TRIGGER: handle_new_user
+--    Safely handles phone-only users where NEW.email is NULL.
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+BEGIN
+  INSERT INTO public.profiles (id, name, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(
+      NEW.raw_user_meta_data->>'name',
+      CASE
+        WHEN NEW.email IS NOT NULL AND NEW.email <> '' THEN SPLIT_PART(NEW.email, '@', 1)
+        ELSE NULL
+      END
+    ),
+    NEW.raw_user_meta_data->>'avatar_url'
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  INSERT INTO public.cycle_settings (user_id, average_cycle_length, average_period_length, auto_theme)
+  VALUES (NEW.id, 28, 5, TRUE)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  INSERT INTO public.preferences (user_id)
+  VALUES (NEW.id)
+  ON CONFLICT (user_id) DO NOTHING;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- 1. PREVIEW RPC: get_partner_invitation_preview
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION public.get_partner_invitation_preview(
