@@ -38,9 +38,27 @@ export default function SettingsPage() {
     ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
     : 'Active Member';
 
+  // Determine account identifier: email users show email, phone-only users show masked phone
+  const accountIdentifier = (() => {
+    if (user?.email) return { label: 'Email', value: user.email };
+    if (user?.phone) {
+      const p = user.phone;
+      const match = p.match(/^(\+\d{1,4})(\d+)$/);
+      if (match) {
+        const [, dial, local] = match;
+        const visible = local.slice(-4);
+        const hidden = '•'.repeat(Math.max(0, local.length - 4));
+        return { label: 'Phone', value: `${dial} ${hidden} ${visible}` };
+      }
+      return { label: 'Phone', value: p };
+    }
+    return { label: 'Account', value: 'Active Lunara Member' };
+  })();
+
   const userInfo = {
     name: userName,
-    email: user?.email || 'Active Lunara Member',
+    accountLabel: accountIdentifier.label,
+    accountValue: accountIdentifier.value,
     createdAt: `Member since ${createdDate}`,
   };
 
@@ -117,7 +135,8 @@ export default function SettingsPage() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-foreground truncate">{userInfo.name}</h3>
-            <p className="text-xs text-muted-fg truncate">{userInfo.email}</p>
+            <p className="text-[10px] text-muted-fg font-medium uppercase tracking-wide mt-0.5">{userInfo.accountLabel}</p>
+            <p className="text-xs text-muted-fg truncate">{userInfo.accountValue}</p>
             <span className="inline-block text-[10px] font-medium text-primary px-2 py-0.5 rounded-full bg-primary-soft mt-1">
               {userInfo.createdAt}
             </span>

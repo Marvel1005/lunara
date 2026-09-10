@@ -82,10 +82,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const userName =
-    profile?.name ||
-    user?.user_metadata?.name ||
-    (user?.email ? user.email.split('@')[0] : 'there');
+  /**
+   * Derive a display name, safe for phone-only users.
+   * Priority: profile.name → user_metadata.name → masked phone → 'there'
+   * Never expose the full phone number.
+   */
+  const userName = (() => {
+    if (profile?.name) return profile.name;
+    if (user?.user_metadata?.name) return user.user_metadata.name;
+    if (user?.email) return user.email.split('@')[0];
+    if (user?.phone) {
+      // Mask: "+919876543210" → "+91 •••••• 3210"
+      const p = user.phone;
+      const match = p.match(/^(\+\d{1,4})(\d+)$/);
+      if (match) {
+        const [, dial, local] = match;
+        const visible = local.slice(-4);
+        const hidden = '••••••';
+        return `${dial} ${hidden} ${visible}`;
+      }
+      return 'there';
+    }
+    return 'there';
+  })();
 
   return (
     <AuthContext.Provider

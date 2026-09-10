@@ -1,6 +1,5 @@
-﻿{
+{
   "imports": {
-    "@supabase/server": "npm:@supabase/server@^1",
-    "nodemailer": "npm:nodemailer@^9"
+    "@supabase/server": "npm:@supabase/server@^1"
   }
 }

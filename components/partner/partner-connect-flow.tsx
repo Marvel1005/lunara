@@ -349,7 +349,7 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
                 {emailSent && (
                   <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-xs text-emerald-800">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Invitation email sent via Gmail to {partnerEmail}</span>
+                    <span>Invitation email sent to {partnerEmail}</span>
                   </div>
                 )}
 
