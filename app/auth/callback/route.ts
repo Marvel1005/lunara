@@ -40,12 +40,15 @@ export async function GET(request: NextRequest) {
   };
 
   // PKCE magic link flow (default for the browser client).
+  let errorMessage = '';
+
   if (code) {
     const supabase = createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       return clearDestinationAnd(NextResponse.redirect(destination));
     }
+    errorMessage = error.message;
   }
 
   // Implicit token_hash flow (fallback for older/other flows).
@@ -58,10 +61,23 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return clearDestinationAnd(NextResponse.redirect(destination));
     }
+    errorMessage = error.message;
+  }
+
+  if (errorMessage) {
+    // Debug aid: shows up in Vercel function logs.
+    console.error('[auth/callback] exchange failed', {
+      hasCode: Boolean(code),
+      hasTokenHash: Boolean(tokenHash),
+      message: errorMessage,
+    });
   }
 
   // Invalid/expired link — never show a blank page.
   const errorUrl = new URL('/login', origin);
   errorUrl.searchParams.set('error', 'magic_link_invalid');
+  if (errorMessage) {
+    errorUrl.searchParams.set('details', errorMessage);
+  }
   return clearDestinationAnd(NextResponse.redirect(errorUrl));
 }

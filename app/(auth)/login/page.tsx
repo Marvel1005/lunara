@@ -10,6 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams?.get('redirectTo') ?? null;
   const authError = magicLinkErrorMessage(searchParams?.get('error'));
+  const details = searchParams?.get('details') ?? null;
 
   const switchLink = (
     <p className="text-xs text-muted-fg">
@@ -30,6 +31,9 @@ function LoginForm() {
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{authError}</span>
         </div>
+      )}
+      {details && (
+        <p className="text-[10px] text-muted-fg/70 font-mono break-all">debug: {details}</p>
       )}
 
       <EmailLoginForm
