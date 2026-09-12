@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { env } from '@/lib/env';
 import { AUTH_NEXT_COOKIE } from '@/lib/auth';
@@ -113,7 +113,35 @@ export function EmailMagicLinkForm({
   const [error, setError] = useState<string | null>(null);
   const [sentEmail, setSentEmail] = useState<string | null>(null);
 
+  // Supabase rate-limits magic-link requests to one per 60s — mirror that in
+  // the UI so repeated clicks can never hit the /otp endpoint early.
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startCooldown = useCallback((seconds = 60) => {
+    setCooldown(seconds);
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+    cooldownRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
+  useEffect(() => () => {
+    if (cooldownRef.current) clearInterval(cooldownRef.current);
+  }, []);
+
   const sendMagicLink = async () => {
+    if (cooldown > 0) {
+      setError('Please wait a moment before requesting another link.');
+      return;
+    }
+
     const validationError = validateEmail(email);
     if (validationError) {
       setError(validationError);
@@ -134,11 +162,17 @@ export function EmailMagicLinkForm({
       });
 
       if (sendError) {
-        setError(friendlyEmailError(sendError.message));
+        const friendly = friendlyEmailError(sendError.message);
+        setError(friendly);
+        const lower = sendError.message.toLowerCase();
+        if (lower.includes('rate limit') || lower.includes('too many') || lower.includes('429')) {
+          startCooldown();
+        }
         return;
       }
 
       setSentEmail(normalizeEmail(email));
+      startCooldown();
     } catch (err: unknown) {
       setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
     } finally {
@@ -162,17 +196,23 @@ export function EmailMagicLinkForm({
             The link is single-use and expires in 1 hour. If it doesn’t open, request a fresh link.
           </p>
         </div>
+        {cooldown > 0 ? (
+          <span className="text-xs text-muted-fg tabular-nums inline-block">
+            Resend in {cooldown}s
+          </span>
+        ) : (
+          <button
+            type="button"
+            disabled={loading}
+            onClick={sendMagicLink}
+            className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
+          >
+            Resend link
+          </button>
+        )}
         <button
           type="button"
-          disabled={loading}
-          onClick={sendMagicLink}
-          className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
-        >
-          Did you get it? Resend link
-        </button>
-        <button
-          type="button"
-          onClick={() => { setSentEmail(null); setError(null); }}
+          onClick={() => { setSentEmail(null); setError(null); setCooldown(0); }}
           className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
         >
           Use a different email
@@ -236,10 +276,14 @@ export function EmailMagicLinkForm({
 
         <button
           type="submit"
-          disabled={loading || !email.trim() || (showName && !name.trim())}
+          disabled={loading || !email.trim() || (showName && !name.trim()) || cooldown > 0}
           className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? <span className="animate-pulse">Sending link…</span> : buttonLabel}
+          {loading
+            ? <span className="animate-pulse">Sending link…</span>
+            : cooldown > 0
+              ? `Wait ${cooldown}s to send another link`
+              : buttonLabel}
         </button>
       </form>
 
