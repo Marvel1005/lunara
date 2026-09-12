@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { env } from '@/lib/env';
-import { AUTH_NEXT_COOKIE } from '@/lib/auth';
 import { AlertCircle } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CALLBACK_PATH = '/auth/callback';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MAGIC_LINK_TTL_SECONDS = 1800;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -22,37 +19,6 @@ function validateEmail(value: string): string | null {
   if (!value.trim()) return 'Please enter your email address.';
   if (!EMAIL_PATTERN.test(value.trim())) return 'Please enter a valid email address.';
   return null;
-}
-
-/** Canonical production redirect target used until https://prathamesh.xyz is live. */
-const PROD_REDIRECT_URL = 'https://lunara-coral.vercel.app';
-
-/**
- * Absolute magic-link redirect URL pointing at the auth callback.
- * Development: the live browser origin (localhost). Production: the canonical
- * site URL, which currently defaults to lunara-coral.vercel.app and can never
- * resolve to localhost even if a stale NEXT_PUBLIC_APP_URL leaks into the build.
- * Deliberately parameter-free so Supabase redirect-allowlist matching is clean.
- */
-function buildRedirectTo(): string {
-  let base = env.siteUrl;
-  if (process.env.NODE_ENV === 'production') {
-    try {
-      if (new URL(base).hostname === 'localhost') base = PROD_REDIRECT_URL;
-    } catch {
-      base = PROD_REDIRECT_URL;
-    }
-  } else if (typeof window !== 'undefined') {
-    base = window.location.origin;
-  }
-  return `${base}${CALLBACK_PATH}`;
-}
-
-/** Remember where to send the user after the callback (set before requesting). */
-function storeAuthDestination(destination: string) {
-  document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(
-    destination
-  )}; path=/; max-age=${MAGIC_LINK_TTL_SECONDS}; samesite=lax`;
 }
 
 function friendlyEmailError(msg: string): string {
@@ -66,6 +32,17 @@ function friendlyEmailError(msg: string): string {
   if (lower.includes('invalid'))
     return 'Please enter a valid email address.';
   return 'Something went wrong. Please try again.';
+}
+
+function friendlyVerifyError(msg: string): string {
+  const lower = msg.toLowerCase();
+  if (lower.includes('expired'))
+    return 'That code has expired. Please request a new one.';
+  if (lower.includes('invalid') || lower.includes('incorrect') || lower.includes('not found'))
+    return 'That code is incorrect. Please check and try again.';
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return 'Too many attempts. Please wait a few minutes before trying again.';
+  return 'Something went wrong. Please request a new code.';
 }
 
 /** Map callback error codes to friendly messages shown on the auth pages. */
@@ -107,11 +84,17 @@ export function EmailMagicLinkForm({
       ? redirectTo
       : '/dashboard';
 
+  const router = useRouter();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentEmail, setSentEmail] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+
+  const EMAIL_CODE_MIN_INTERVAL_SECONDS = 60;
 
   // Supabase rate-limits magic-link requests to one per 60s — mirror that in
   // the UI so repeated clicks can never hit the /otp endpoint early.
@@ -136,9 +119,9 @@ export function EmailMagicLinkForm({
     if (cooldownRef.current) clearInterval(cooldownRef.current);
   }, []);
 
-  const sendMagicLink = async () => {
+  const sendCode = async () => {
     if (cooldown > 0) {
-      setError('Please wait a moment before requesting another link.');
+      setError('Please wait a moment before requesting another code.');
       return;
     }
 
@@ -151,12 +134,10 @@ export function EmailMagicLinkForm({
     setLoading(true);
     setError(null);
     try {
-      storeAuthDestination(validTarget);
       const supabase = createClient();
       const { error: sendError } = await supabase.auth.signInWithOtp({
         email: normalizeEmail(email),
         options: {
-          emailRedirectTo: buildRedirectTo(),
           ...(showName && name.trim() ? { data: { name: name.trim() } } : {}),
         },
       });
@@ -172,7 +153,8 @@ export function EmailMagicLinkForm({
       }
 
       setSentEmail(normalizeEmail(email));
-      startCooldown();
+      setCode('');
+      startCooldown(EMAIL_CODE_MIN_INTERVAL_SECONDS);
     } catch (err: unknown) {
       setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
     } finally {
@@ -182,7 +164,37 @@ export function EmailMagicLinkForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendMagicLink();
+    sendCode();
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (verifying) return;
+    if (code.length !== 6) {
+      setError('Please enter the 6-digit code from the email.');
+      return;
+    }
+
+    setVerifying(true);
+    setError(null);
+    try {
+      const res = await fetch('/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sentEmail, token: code }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(friendlyVerifyError(data.error ?? 'Verification failed.'));
+        return;
+      }
+      router.push(validTarget);
+      router.refresh();
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   if (sentEmail) {
@@ -193,26 +205,59 @@ export function EmailMagicLinkForm({
           <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
           <p className="text-xs text-muted-fg leading-relaxed">{successBody(sentEmail)}</p>
           <p className="text-[11px] text-muted-fg/80 leading-relaxed">
-            The link is single-use and expires in 1 hour. If it doesn’t open, request a fresh link.
+            Your code is single-use and expires in 1 hour.
           </p>
         </div>
-        {cooldown > 0 ? (
-          <span className="text-xs text-muted-fg tabular-nums inline-block">
-            Resend in {cooldown}s
-          </span>
-        ) : (
-          <button
-            type="button"
-            disabled={loading}
-            onClick={sendMagicLink}
-            className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
-          >
-            Resend link
-          </button>
+
+        {error && (
+          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
+
+        <form onSubmit={handleVerify} className="space-y-3">
+          <input
+            id="signin-code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            pattern="\d{6}"
+            maxLength={6}
+            required
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            placeholder="6-digit code"
+            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm text-center tracking-[0.5em] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
+          />
+          <button
+            type="submit"
+            disabled={verifying || code.length !== 6}
+            className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {verifying ? <span className="animate-pulse">Verifying…</span> : 'Sign in with code'}
+          </button>
+        </form>
+
+        <div className="space-y-1 text-xs">
+          {cooldown > 0 ? (
+            <span className="text-xs text-muted-fg tabular-nums inline-block">
+              Resend in {cooldown}s
+            </span>
+          ) : (
+            <button
+              type="button"
+              disabled={loading}
+              onClick={sendCode}
+              className="font-semibold text-primary hover:underline disabled:opacity-50"
+            >
+              Resend code
+            </button>
+          )}
+        </div>
         <button
           type="button"
-          onClick={() => { setSentEmail(null); setError(null); setCooldown(0); }}
+          onClick={() => { setSentEmail(null); setError(null); setCooldown(0); setCode(''); }}
           className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
         >
           Use a different email
@@ -280,9 +325,9 @@ export function EmailMagicLinkForm({
           className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading
-            ? <span className="animate-pulse">Sending link…</span>
+            ? <span className="animate-pulse">Sending code…</span>
             : cooldown > 0
-              ? `Wait ${cooldown}s to send another link`
+              ? `Wait ${cooldown}s to send another code`
               : buttonLabel}
         </button>
       </form>
@@ -309,14 +354,14 @@ export function EmailLoginForm({ switchLink, redirectTo }: EmailLoginFormProps) 
       switchLink={switchLink}
       redirectTo={redirectTo}
       heading="Welcome back"
-      subheading="Enter your email and we’ll send you a secure sign-in link. No password needed."
-      buttonLabel="Send magic link"
+      subheading="Enter your email and we’ll send you a secure sign-in code. No password needed."
+      buttonLabel="Send sign-in code"
       successTitle="Check your email"
       successBody={(email) => (
         <>
-          We’ve sent you a secure sign-in link to{' '}
+          We’ve sent a 6-digit code to{' '}
           <span className="font-semibold text-foreground">{email}</span>.
-          Open it to finish signing in.
+          Enter it below to finish signing in.
         </>
       )}
     />
@@ -340,13 +385,13 @@ export function EmailSignupForm({ switchLink, redirectTo }: EmailSignupFormProps
       redirectTo={redirectTo}
       heading="Begin your journey"
       subheading="Create your Lunara account — no password needed."
-      buttonLabel="Send magic link"
+      buttonLabel="Send sign-in code"
       successTitle="Check your email"
       successBody={(email) => (
         <>
-          We’ve sent you a secure sign-in link to{' '}
+          We’ve sent a 6-digit code to{' '}
           <span className="font-semibold text-foreground">{email}</span>.
-          Open it to create your Lunara account and sign in.
+          Enter it below to create your Lunara account and sign in.
         </>
       )}
     />
