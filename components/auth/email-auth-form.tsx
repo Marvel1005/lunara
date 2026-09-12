@@ -22,9 +22,16 @@ function validateEmail(value: string): string | null {
   return null;
 }
 
-/** Absolute magic-link redirect URL pointing at the auth callback. */
+/**
+ * Absolute magic-link redirect URL pointing at the auth callback.
+ * Uses the live browser origin so links always resolve to the site the user
+ * is actually on — localhost during development, https://prathamesh.xyz in
+ * production — regardless of the build-time NEXT_PUBLIC_APP_URL value.
+ */
 function buildRedirectTo(validTarget: string): string {
-  return `${env.siteUrl}${CALLBACK_PATH}?next=${encodeURIComponent(validTarget)}`;
+  const base =
+    typeof window !== 'undefined' ? window.location.origin : env.siteUrl;
+  return `${base}${CALLBACK_PATH}?next=${encodeURIComponent(validTarget)}`;
 }
 
 function friendlyEmailError(msg: string): string {
