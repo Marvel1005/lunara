@@ -16,11 +16,12 @@ export function validateEnv(): EnvConfig {
 
   // Single application-URL source used for auth redirects and metadata.
   // Reuses the existing NEXT_PUBLIC_APP_URL pattern.
-  // Local: http://localhost:3000   Production: https://prathamesh.xyz
+  // Local: http://localhost:3000   Production: https://lunara-coral.vercel.app
+  // (temporary — swap the production fallback to https://prathamesh.xyz when live)
   const siteUrl =
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.NODE_ENV === 'production'
-      ? 'https://prathamesh.xyz'
+      ? 'https://lunara-coral.vercel.app'
       : 'http://localhost:3000');
 
   const isConfigured = Boolean(

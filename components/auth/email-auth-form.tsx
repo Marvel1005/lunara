@@ -22,15 +22,26 @@ function validateEmail(value: string): string | null {
   return null;
 }
 
+/** Canonical production redirect target used until https://prathamesh.xyz is live. */
+const PROD_REDIRECT_URL = 'https://lunara-coral.vercel.app';
+
 /**
  * Absolute magic-link redirect URL pointing at the auth callback.
- * Uses the live browser origin so links always resolve to the site the user
- * is actually on — localhost during development, https://prathamesh.xyz in
- * production — regardless of the build-time NEXT_PUBLIC_APP_URL value.
+ * Development: the live browser origin (localhost). Production: the canonical
+ * site URL, which currently defaults to lunara-coral.vercel.app and can never
+ * resolve to localhost even if a stale NEXT_PUBLIC_APP_URL leaks into the build.
  */
 function buildRedirectTo(validTarget: string): string {
-  const base =
-    typeof window !== 'undefined' ? window.location.origin : env.siteUrl;
+  let base = env.siteUrl;
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      if (new URL(base).hostname === 'localhost') base = PROD_REDIRECT_URL;
+    } catch {
+      base = PROD_REDIRECT_URL;
+    }
+  } else if (typeof window !== 'undefined') {
+    base = window.location.origin;
+  }
   return `${base}${CALLBACK_PATH}?next=${encodeURIComponent(validTarget)}`;
 }
 
