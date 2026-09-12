@@ -1,30 +1,221 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { env } from '@/lib/env';
+import { AlertCircle } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
+const CALLBACK_PATH = '/auth/callback';
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeEmail(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function validateEmail(value: string): string | null {
+  if (!value.trim()) return 'Please enter your email address.';
+  if (!EMAIL_PATTERN.test(value.trim())) return 'Please enter a valid email address.';
+  return null;
+}
+
+/** Absolute magic-link redirect URL pointing at the auth callback. */
+function buildRedirectTo(validTarget: string): string {
+  return `${env.siteUrl}${CALLBACK_PATH}?next=${encodeURIComponent(validTarget)}`;
+}
+
 function friendlyEmailError(msg: string): string {
   const lower = msg.toLowerCase();
-  if (lower.includes('invalid login') || lower.includes('invalid credentials'))
-    return 'Incorrect email or password. Please try again.';
-  if (lower.includes('email not confirmed'))
-    return 'Please confirm your email address before signing in. Check your inbox.';
-  if (lower.includes('user already registered') || lower.includes('already been registered'))
-    return 'An account with this email already exists. Try signing in instead.';
-  if (lower.includes('password') && lower.includes('short'))
-    return 'Password must be at least 6 characters.';
-  if (lower.includes('failed to fetch') || lower.includes('network'))
-    return 'Network error. Please check your connection and try again.';
-  if (lower.includes('rate limit') || lower.includes('too many'))
+  if (lower.includes('rate limit') || lower.includes('too many') || lower.includes('429'))
     return 'Too many attempts. Please wait a few minutes before trying again.';
+  if (lower.includes('failed to fetch') || lower.includes('network') || lower.includes('fetch'))
+    return 'Network error. Please check your connection and try again.';
+  if (lower.includes('email not allowed') || lower.includes('signups not allowed') || lower.includes('disabled'))
+    return 'Sign-in with this email is not available right now. Please try again later.';
+  if (lower.includes('invalid'))
+    return 'Please enter a valid email address.';
   return 'Something went wrong. Please try again.';
+}
+
+/** Map callback error codes to friendly messages shown on the auth pages. */
+export function magicLinkErrorMessage(code: string | null): string | null {
+  if (code === 'magic_link_invalid')
+    return 'That sign-in link is invalid or has expired. Please request a new one to continue.';
+  if (code)
+    return 'We couldn’t complete that sign-in. Please try again.';
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAGIC LINK SENDER
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface MagicLinkFormProps {
+  switchLink: React.ReactNode;
+  redirectTo?: string | null;
+  heading: string;
+  subheading: string;
+  showName?: boolean;
+  buttonLabel: string;
+  successTitle: string;
+  successBody: (email: string) => React.ReactNode;
+}
+
+export function EmailMagicLinkForm({
+  switchLink,
+  redirectTo,
+  heading,
+  subheading,
+  showName = false,
+  buttonLabel,
+  successTitle,
+  successBody,
+}: MagicLinkFormProps) {
+  const validTarget =
+    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
+      ? redirectTo
+      : '/dashboard';
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
+
+  const sendMagicLink = async () => {
+    const validationError = validateEmail(email);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { error: sendError } = await supabase.auth.signInWithOtp({
+        email: normalizeEmail(email),
+        options: {
+          emailRedirectTo: buildRedirectTo(validTarget),
+          ...(showName && name.trim() ? { data: { name: name.trim() } } : {}),
+        },
+      });
+
+      if (sendError) {
+        setError(friendlyEmailError(sendError.message));
+        return;
+      }
+
+      setSentEmail(normalizeEmail(email));
+    } catch (err: unknown) {
+      setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMagicLink();
+  };
+
+  if (sentEmail) {
+    return (
+      <div className="space-y-4 text-center">
+        <div className="text-3xl">📬</div>
+        <div className="space-y-1">
+          <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
+          <p className="text-xs text-muted-fg leading-relaxed">{successBody(sentEmail)}</p>
+        </div>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={sendMagicLink}
+          className="text-xs font-semibold text-primary hover:underline disabled:opacity-50"
+        >
+          Did you get it? Resend link
+        </button>
+        <button
+          type="button"
+          onClick={() => { setSentEmail(null); setError(null); }}
+          className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
+        >
+          Use a different email
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      {heading && (
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>
+          {subheading && <p className="text-xs text-muted-fg">{subheading}</p>}
+        </div>
+      )}
+
+      {error && (
+        <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {showName && (
+          <div>
+            <label htmlFor="email-signup-name" className="block text-xs font-semibold text-foreground mb-1.5">
+              Your name
+            </label>
+            <input
+              id="email-signup-name"
+              type="text"
+              autoComplete="given-name"
+              required
+              minLength={2}
+              maxLength={60}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Priya"
+              className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
+            />
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="magic-link-email" className="block text-xs font-semibold text-foreground mb-1.5">
+            Email
+          </label>
+          <input
+            id="magic-link-email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || !email.trim() || (showName && !name.trim())}
+          className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? <span className="animate-pulse">Sending link…</span> : buttonLabel}
+        </button>
+      </form>
+
+      <div className="text-center pt-3 border-t border-border/50">
+        {switchLink}
+      </div>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -37,139 +228,22 @@ interface EmailLoginFormProps {
 }
 
 export function EmailLoginForm({ switchLink, redirectTo }: EmailLoginFormProps) {
-  const router = useRouter();
-  const validTarget =
-    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
-      ? redirectTo
-      : '/dashboard';
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [checkEmail, setCheckEmail] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      });
-
-      if (signInError) {
-        setError(friendlyEmailError(signInError.message));
-        return;
-      }
-
-      if (!data.session) {
-        // email confirmation required
-        setCheckEmail(true);
-        return;
-      }
-
-      router.push(validTarget);
-      router.refresh();
-    } catch (err: unknown) {
-      setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (checkEmail) {
-    return (
-      <div className="space-y-4 text-center">
-        <div className="text-3xl">📬</div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground">Check your email</h2>
-          <p className="text-xs text-muted-fg leading-relaxed">
-            We sent a confirmation link to{' '}
-            <span className="font-semibold text-foreground">{email}</span>.
-            Open it to complete sign-in.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => { setCheckEmail(false); setPassword(''); }}
-          className="text-xs text-primary font-semibold hover:underline"
-        >
-          Use a different email
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-5">
-      {error && (
-        <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
-        </div>
+    <EmailMagicLinkForm
+      switchLink={switchLink}
+      redirectTo={redirectTo}
+      heading="Welcome back"
+      subheading="Enter your email and we’ll send you a secure sign-in link. No password needed."
+      buttonLabel="Send magic link"
+      successTitle="Check your email"
+      successBody={(email) => (
+        <>
+          We’ve sent you a secure sign-in link to{' '}
+          <span className="font-semibold text-foreground">{email}</span>.
+          Open it to finish signing in.
+        </>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label htmlFor="email-login" className="block text-xs font-semibold text-foreground mb-1.5">
-            Email
-          </label>
-          <input
-            id="email-login"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="password-login" className="block text-xs font-semibold text-foreground mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="password-login"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full px-4 py-3 pr-11 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-fg hover:text-foreground transition-colors"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || !email || !password}
-          className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? <span className="animate-pulse">Signing in…</span> : 'Sign In'}
-        </button>
-      </form>
-
-      <div className="text-center pt-3 border-t border-border/50">
-        {switchLink}
-      </div>
-    </div>
+    />
   );
 }
 
@@ -183,170 +257,22 @@ interface EmailSignupFormProps {
 }
 
 export function EmailSignupForm({ switchLink, redirectTo }: EmailSignupFormProps) {
-  const router = useRouter();
-  const validTarget =
-    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
-      ? redirectTo
-      : '/dashboard';
-
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [checkEmail, setCheckEmail] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (name.trim().length < 2) {
-      setError('Please enter your name (at least 2 characters).');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: email.trim().toLowerCase(),
-        password,
-        options: {
-          data: { name: name.trim() },
-        },
-      });
-
-      if (signUpError) {
-        setError(friendlyEmailError(signUpError.message));
-        return;
-      }
-
-      if (data.session) {
-        // Email confirmation disabled — user is logged in immediately
-        router.push(validTarget);
-        router.refresh();
-      } else {
-        // Email confirmation required
-        setCheckEmail(true);
-      }
-    } catch (err: unknown) {
-      setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (checkEmail) {
-    return (
-      <div className="space-y-4 text-center">
-        <div className="text-3xl">📬</div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-bold text-foreground">Confirm your email</h2>
-          <p className="text-xs text-muted-fg leading-relaxed">
-            We sent a confirmation link to{' '}
-            <span className="font-semibold text-foreground">{email}</span>.
-            Open it to activate your account.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => { setCheckEmail(false); setPassword(''); }}
-          className="text-xs text-primary font-semibold hover:underline"
-        >
-          Use a different email
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-5">
-      {error && (
-        <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{error}</span>
-        </div>
+    <EmailMagicLinkForm
+      showName
+      switchLink={switchLink}
+      redirectTo={redirectTo}
+      heading="Begin your journey"
+      subheading="Create your Lunara account — no password needed."
+      buttonLabel="Send magic link"
+      successTitle="Check your email"
+      successBody={(email) => (
+        <>
+          We’ve sent you a secure sign-in link to{' '}
+          <span className="font-semibold text-foreground">{email}</span>.
+          Open it to create your Lunara account and sign in.
+        </>
       )}
-
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label htmlFor="email-signup-name" className="block text-xs font-semibold text-foreground mb-1.5">
-            Your name
-          </label>
-          <input
-            id="email-signup-name"
-            type="text"
-            autoComplete="given-name"
-            required
-            minLength={2}
-            maxLength={60}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Priya"
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email-signup-email" className="block text-xs font-semibold text-foreground mb-1.5">
-            Email
-          </label>
-          <input
-            id="email-signup-email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email-signup-password" className="block text-xs font-semibold text-foreground mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              id="email-signup-password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              required
-              minLength={6}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 6 characters"
-              className="w-full px-4 py-3 pr-11 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-fg hover:text-foreground transition-colors"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading || !name.trim() || !email || !password}
-          className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? <span className="animate-pulse">Creating account…</span> : 'Create Account'}
-        </button>
-      </form>
-
-      <div className="text-center pt-3 border-t border-border/50">
-        {switchLink}
-      </div>
-    </div>
+    />
   );
 }

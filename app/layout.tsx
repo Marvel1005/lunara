@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { env } from '@/lib/env';
 import { QueryProvider } from '@/providers/query-provider';
 import { AuthProvider } from '@/providers/auth-provider';
 
@@ -8,10 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lunara.vercel.app')
-  ),
+  metadataBase: new URL(env.siteUrl),
   title: 'Lunara — Your cycle. Your comfort.',
   description: 'A premium personal menstrual-cycle and wellness companion.',
   icons: {
