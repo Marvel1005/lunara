@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { env } from '@/lib/env';
+import { AUTH_NEXT_COOKIE } from '@/lib/auth';
 import { AlertCircle } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -11,6 +12,7 @@ import { AlertCircle } from 'lucide-react';
 
 const CALLBACK_PATH = '/auth/callback';
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAGIC_LINK_TTL_SECONDS = 1800;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -30,8 +32,9 @@ const PROD_REDIRECT_URL = 'https://lunara-coral.vercel.app';
  * Development: the live browser origin (localhost). Production: the canonical
  * site URL, which currently defaults to lunara-coral.vercel.app and can never
  * resolve to localhost even if a stale NEXT_PUBLIC_APP_URL leaks into the build.
+ * Deliberately parameter-free so Supabase redirect-allowlist matching is clean.
  */
-function buildRedirectTo(validTarget: string): string {
+function buildRedirectTo(): string {
   let base = env.siteUrl;
   if (process.env.NODE_ENV === 'production') {
     try {
@@ -42,7 +45,14 @@ function buildRedirectTo(validTarget: string): string {
   } else if (typeof window !== 'undefined') {
     base = window.location.origin;
   }
-  return `${base}${CALLBACK_PATH}?next=${encodeURIComponent(validTarget)}`;
+  return `${base}${CALLBACK_PATH}`;
+}
+
+/** Remember where to send the user after the callback (set before requesting). */
+function storeAuthDestination(destination: string) {
+  document.cookie = `${AUTH_NEXT_COOKIE}=${encodeURIComponent(
+    destination
+  )}; path=/; max-age=${MAGIC_LINK_TTL_SECONDS}; samesite=lax`;
 }
 
 function friendlyEmailError(msg: string): string {
@@ -113,11 +123,12 @@ export function EmailMagicLinkForm({
     setLoading(true);
     setError(null);
     try {
+      storeAuthDestination(validTarget);
       const supabase = createClient();
       const { error: sendError } = await supabase.auth.signInWithOtp({
         email: normalizeEmail(email),
         options: {
-          emailRedirectTo: buildRedirectTo(validTarget),
+          emailRedirectTo: buildRedirectTo(),
           ...(showName && name.trim() ? { data: { name: name.trim() } } : {}),
         },
       });
@@ -147,6 +158,9 @@ export function EmailMagicLinkForm({
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
           <p className="text-xs text-muted-fg leading-relaxed">{successBody(sentEmail)}</p>
+          <p className="text-[11px] text-muted-fg/80 leading-relaxed">
+            The link is single-use and expires in 1 hour. If it doesn’t open, request a fresh link.
+          </p>
         </div>
         <button
           type="button"
