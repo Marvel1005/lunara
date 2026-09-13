@@ -170,7 +170,7 @@ export function EmailMagicLinkForm({
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verifying) return;
-    if (code.length < 6 || code.length > 8) {
+    if (code.length < 6 || code.length > 12) {
       setError('Please enter the full code from the email.');
       return;
     }
@@ -223,11 +223,11 @@ export function EmailMagicLinkForm({
             inputMode="numeric"
             autoComplete="one-time-code"
             autoFocus
-            pattern="\d{6,8}"
-            maxLength={8}
+            pattern="\d{6,12}"
+            maxLength={12}
             required
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 12))}
             placeholder="Enter the code from your email"
             className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm text-center tracking-[0.5em] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
           />
