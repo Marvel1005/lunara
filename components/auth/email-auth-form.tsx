@@ -170,8 +170,8 @@ export function EmailMagicLinkForm({
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verifying) return;
-    if (code.length !== 6) {
-      setError('Please enter the 6-digit code from the email.');
+    if (code.length < 6 || code.length > 8) {
+      setError('Please enter the full code from the email.');
       return;
     }
 
@@ -222,12 +222,13 @@ export function EmailMagicLinkForm({
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            pattern="\d{6}"
-            maxLength={6}
+            autoFocus
+            pattern="\d{6,8}"
+            maxLength={8}
             required
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-            placeholder="6-digit code"
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+            placeholder="Enter the code from your email"
             className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm text-center tracking-[0.5em] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
           />
           <button
@@ -359,7 +360,7 @@ export function EmailLoginForm({ switchLink, redirectTo }: EmailLoginFormProps) 
       successTitle="Check your email"
       successBody={(email) => (
         <>
-          We’ve sent a 6-digit code to{' '}
+          We’ve sent a code to{' '}
           <span className="font-semibold text-foreground">{email}</span>.
           Enter it below to finish signing in.
         </>
@@ -389,7 +390,7 @@ export function EmailSignupForm({ switchLink, redirectTo }: EmailSignupFormProps
       successTitle="Check your email"
       successBody={(email) => (
         <>
-          We’ve sent a 6-digit code to{' '}
+          We’ve sent a code to{' '}
           <span className="font-semibold text-foreground">{email}</span>.
           Enter it below to create your Lunara account and sign in.
         </>
