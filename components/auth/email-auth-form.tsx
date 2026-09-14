@@ -11,7 +11,7 @@ import { OtpInput } from './otp-input';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const OTP_LENGTH = 6;
+const OTP_LENGTH = 8;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -81,7 +81,7 @@ export function EmailMagicLinkForm({
   const heading = mode === 'login' ? 'Welcome back' : 'Begin your journey';
   const subheading =
     mode === 'login'
-      ? "Enter your email and we'll send you a 6-digit sign-in code. No password needed."
+      ? "Enter your email and we'll send you an 8-digit sign-in code. No password needed."
       : 'Create your Lunara account — no password needed.';
   const buttonLabel = 'Send sign-in code';
   const successTitle = 'Check your email';
@@ -200,7 +200,7 @@ export function EmailMagicLinkForm({
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
           <p className="text-xs text-muted-fg leading-relaxed">
-            We&apos;ve sent a 6-digit code to{' '}
+            We&apos;ve sent an 8-digit code to{' '}
             <span className="font-semibold text-foreground">{sentEmail}</span>.
             {mode === 'login'
               ? ' Enter it below to finish signing in.'

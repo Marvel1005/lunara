@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 
 const VerifySchema = z.object({
   email: z.string().trim().min(3).max(254).email('Invalid email address.'),
-  token: z.string().regex(/^\d{6}$/, 'Code must be exactly 6 digits.'),
+  token: z.string().regex(/^\d{8}$/, 'Code must be exactly 8 digits.'),
 });
 
 export async function POST(request: NextRequest) {
