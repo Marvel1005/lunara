@@ -114,8 +114,14 @@ export function PartnerPermissionsEditor({ connectionId, current }: PartnerPermi
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-    } catch {
-      setError('Something went wrong. Your sharing settings were not changed.');
+    } catch (err) {
+      console.error('updatePermissions failed:', err);
+      const msg = err instanceof Error ? err.message : '';
+      setError(
+        msg.includes('not found or unauthorized')
+          ? 'Only the person sharing (the inviter) can change these settings, on their own account.'
+          : `Something went wrong. Your sharing settings were not changed.${msg ? ` (${msg})` : ''}`
+      );
     }
   };
 
