@@ -5,7 +5,6 @@ import { PartnerSettings } from '@/components/partner/partner-settings';
 import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import { usePartnerViewConnections, useSharedPartnerStatus } from '@/lib/hooks/use-partner';
 import { PartnerDashboard } from '@/components/partner/partner-dashboard';
-import { useAuth } from '@/providers/auth-provider';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 function PartnerView() {
@@ -41,7 +40,6 @@ function PartnerView() {
 }
 
 export default function PartnerSupportPage() {
-  const { isPartner } = useAuth();
   const { data: partnerViewConns } = usePartnerViewConnections();
   const hasPartnerViewConnection = (partnerViewConns?.length ?? 0) > 0;
 
@@ -52,25 +50,21 @@ export default function PartnerSupportPage() {
         <div className="flex items-center gap-2">
           <Heart className="w-5 h-5 text-primary fill-primary/20" />
           <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-            {isPartner ? 'Supporting Your Partner' : 'Partner Comfort Sharing'}
+            Partner Comfort Sharing
           </h1>
         </div>
         <p className="text-xs sm:text-sm text-muted-fg leading-relaxed">
-          {isPartner
-            ? 'Gentle updates your partner chooses to share, so you know how to support them best.'
-            : 'Share gentle cycle status updates and comfort requests with someone you trust so they know how to support you best.'}
+          Share gentle cycle status updates and comfort requests with someone you trust so they know how to support you best.
         </p>
       </div>
 
-      {/* Primary user: My partner settings — members only */}
-      {!isPartner && (
-        <section aria-labelledby="my-partner-heading" className="space-y-3">
-          <PartnerSettings />
-        </section>
-      )}
+      {/* My partner settings (as the sharer) */}
+      <section aria-labelledby="my-partner-heading" className="space-y-3">
+        <PartnerSettings />
+      </section>
 
       {/* Partner view: supporting someone else */}
-      {(hasPartnerViewConnection || isPartner) && (
+      {hasPartnerViewConnection && (
         <section aria-labelledby="supporting-heading" className="space-y-3 pt-2">
           <div className="flex items-center gap-2 border-b border-border/60 pb-2">
             <h2

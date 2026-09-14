@@ -3,24 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/providers/auth-provider';
 import {
   LayoutDashboard,
   Calendar,
   HeartPulse,
   Heart,
   Settings,
-  type LucideIcon,
 } from 'lucide-react';
 
-interface NavItem {
-  name: string;
-  href: string;
-  icon: LucideIcon;
-  isHighlight?: boolean;
-}
-
-const mobileNavItems: NavItem[] = [
+const mobileNavItems = [
   { name: 'Home', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Calendar', href: '/calendar', icon: Calendar },
   { name: 'Hurting', href: '/pain', icon: HeartPulse, isHighlight: true },
@@ -28,20 +19,13 @@ const mobileNavItems: NavItem[] = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-const partnerMobileNavItems: NavItem[] = [
-  { name: 'Partner', href: '/partner-support', icon: Heart },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
-
 export function MobileNav() {
   const pathname = usePathname();
-  const { isPartner } = useAuth();
-  const items = isPartner ? partnerMobileNavItems : mobileNavItems;
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-border px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
       <nav className="flex items-center justify-around max-w-md mx-auto">
-        {items.map((item) => {
+        {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
 

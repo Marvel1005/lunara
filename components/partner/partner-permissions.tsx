@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import type { PartnerPermissions } from '@/lib/partner/types';
@@ -89,12 +89,22 @@ export function PartnerPermissionsEditor({ connectionId, current }: PartnerPermi
 
   const { updatePermissions, isUpdatingPermissions } = useMyPartnerConnections();
 
+  // Keep local state in sync when fresh permissions arrive after save/refetch.
+  useEffect(() => {
+    setPerms(current);
+    setCustomMessage(current.custom_status_message ?? '');
+    setSaved(false);
+    setError(null);
+  }, [current]);
+
   const toggle = (key: keyof PartnerPermissions) => {
     setPerms((prev) => {
       const next = { ...prev, [key]: !prev[key] };
-      // Automatically disable severity when pain status is turned off
+      // Automatically disable dependents when pain status is turned off
       if (key === 'share_pain_status' && !next.share_pain_status) {
         next.share_pain_severity = false;
+        next.share_pain_location = false;
+        next.share_pain_type = false;
       }
       return next;
     });

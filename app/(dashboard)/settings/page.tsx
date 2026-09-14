@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeSelector } from '@/components/theme/theme-selector';
+import { SecuritySettings } from '@/components/settings/security-settings';
 import { createClient } from '@/lib/supabase/client';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
 import { useAuth } from '@/providers/auth-provider';
@@ -144,7 +145,10 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* 2. CYCLE PARAMETERS */}
+      {/* 2. SECURITY (ONE-TIME PASSWORD SETUP) */}
+      <SecuritySettings />
+
+      {/* 3. CYCLE PARAMETERS */}
       <div className="glass-panel p-5 rounded-2xl shadow-soft border border-border space-y-4">
         <div className="flex items-center gap-2 border-b border-border/60 pb-3">
           <Sliders className="w-4 h-4 text-primary" />
@@ -232,7 +236,7 @@ export default function SettingsPage() {
         </form>
       </div>
 
-      {/* 3. THEME & ATMOSPHERE */}
+      {/* 4. THEME & ATMOSPHERE */}
       <div className="glass-panel p-5 rounded-2xl shadow-soft border border-border space-y-3">
         <div className="flex items-center gap-2 border-b border-border/60 pb-3">
           <Palette className="w-4 h-4 text-primary" />
@@ -241,7 +245,7 @@ export default function SettingsPage() {
         <ThemeSelector />
       </div>
 
-      {/* 4. PRIVACY FOOTER NOTE */}
+      {/* 5. PRIVACY FOOTER NOTE */}
       <div className="flex items-center justify-center gap-2 p-3 text-xs text-muted-fg text-center">
         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
         <span>Your cycle and body data is privately encrypted and accessible only to you.</span>

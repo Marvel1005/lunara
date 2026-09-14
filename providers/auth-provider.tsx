@@ -1,14 +1,15 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { User } from '@supabase/supabase-js';
+import { useQueryClient } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 
 interface Profile {
   id: string;
   name: string | null;
   avatar_url: string | null;
-  app_role: string | null;
+  password_set: boolean | null;
 }
 
 interface AuthContextType {
@@ -16,7 +17,6 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   userName: string;
-  isPartner: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -28,12 +28,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const supabase = createClient();
+  const queryClient = useQueryClient();
+  // Track the signed-in user so a different login wipes the previous
+  // account's cached queries (periods, wellness, partner data, ...).
+  const lastUserIdRef = useRef<string | null | undefined>(undefined);
 
   const fetchProfile = async (userId: string) => {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, name, avatar_url, app_role')
+        .select('id, name, avatar_url, password_set')
         .eq('id', userId)
         .single();
 
@@ -61,6 +65,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
         const currentUser = session?.user ?? null;
+        // Account switch (including sign-out): drop the previous account's
+        // cached data before loading the new one.
+        if (lastUserIdRef.current !== undefined && lastUserIdRef.current !== currentUser?.id) {
+          queryClient.clear();
+          setProfile(null);
+        }
+        lastUserIdRef.current = currentUser?.id ?? null;
         setUser(currentUser);
         if (currentUser) {
           await fetchProfile(currentUser.id);
@@ -115,7 +126,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile,
         isLoading,
         userName,
-        isPartner: profile?.app_role === 'partner',
         refreshProfile,
       }}
     >

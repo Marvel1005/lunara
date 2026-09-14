@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useCycleSummary } from '@/lib/hooks/use-cycle';
-import { useAuth } from '@/providers/auth-provider';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
@@ -31,19 +30,10 @@ const mainNavItems = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-const partnerNavItems = [
-  { name: 'Partner Support', href: '/partner-support', icon: Heart },
-  { name: 'Settings', href: '/settings', icon: Settings },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { cycleSummary } = useCycleSummary();
-  const { isPartner } = useAuth();
-
-  // Partner-only accounts see just Partner Support + Settings.
-  const navItems = isPartner ? partnerNavItems : mainNavItems;
 
   const handleSignOut = async () => {
     try {
@@ -70,20 +60,18 @@ export function Sidebar() {
           </div>
         </div>
 
-        {/* Hurt Emergency Action — members only */}
-        {!isPartner && (
-          <Link
-            href="/pain"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:shadow-comfort hover:scale-[1.01] transition-all cursor-pointer border border-white/20"
-          >
-            <HeartPulse className="w-4 h-4 text-white" />
-            <span>I&apos;m hurting right now</span>
-          </Link>
-        )}
+        {/* Hurt Emergency Action */}
+        <Link
+          href="/pain"
+          className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:shadow-comfort hover:scale-[1.01] transition-all cursor-pointer border border-white/20"
+        >
+          <HeartPulse className="w-4 h-4 text-white" />
+          <span>I&apos;m hurting right now</span>
+        </Link>
 
         {/* Navigation Items */}
         <nav className="space-y-1">
-          {navItems.map((item) => {
+          {mainNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
 
@@ -114,8 +102,8 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer / Cycle Status summary pill — members only */}
-      {!isPartner && cycleSummary.hasCycleData && (
+      {/* Footer / Cycle Status summary pill */}
+      {cycleSummary.hasCycleData && (
         <div className="p-3.5 rounded-2xl bg-primary-soft/50 border border-border text-center">
           <p className="text-xs font-semibold text-primary">
             {cycleSummary.isPeriod

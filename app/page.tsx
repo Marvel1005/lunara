@@ -4,13 +4,5 @@ import { createClient } from '@/lib/supabase/server';
 export default async function RootPage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('app_role')
-    .eq('id', user.id)
-    .single();
-
-  redirect(profile?.app_role === 'partner' ? '/partner-support' : '/dashboard');
+  redirect(user ? '/dashboard' : '/login');
 }

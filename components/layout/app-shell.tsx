@@ -4,7 +4,6 @@ import React from 'react';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { MobileNav } from './mobile-nav';
-import { PartnerGate } from '@/components/auth/partner-gate';
 import { ThemeBackground } from '@/components/theme/theme-background';
 
 interface AppShellProps {
@@ -14,7 +13,6 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen flex bg-background text-foreground transition-colors duration-500 relative">
-      <PartnerGate />
       {/* Theme Ambient Background Layer */}
       <ThemeBackground />
 
