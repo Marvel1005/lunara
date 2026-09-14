@@ -16,9 +16,15 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT,
   avatar_url TEXT,
+  app_role TEXT NOT NULL DEFAULT 'member' CHECK (app_role IN ('member', 'partner')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Partner-role column for databases created before the role was introduced.
+-- (CREATE TABLE IF NOT EXISTS won't backfill it, so keep this in sync.)
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS app_role TEXT NOT NULL DEFAULT 'member' CHECK (app_role IN ('member', 'partner'));
 
 -- 2. CYCLE SETTINGS TABLE
 CREATE TABLE IF NOT EXISTS public.cycle_settings (
@@ -492,6 +498,9 @@ BEGIN
   );
 
   UPDATE public.partner_invitations SET status = 'accepted', accepted_at = NOW() WHERE id = v_invite.id;
+
+  -- The acceptor becomes a partner-only user.
+  UPDATE public.profiles SET app_role = 'partner', updated_at = NOW() WHERE id = v_caller_id;
 
   RETURN jsonb_build_object('success', true, 'connection_id', v_connection_id, 'status', 'active');
 END;

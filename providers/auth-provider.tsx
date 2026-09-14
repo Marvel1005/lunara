@@ -8,6 +8,7 @@ interface Profile {
   id: string;
   name: string | null;
   avatar_url: string | null;
+  app_role: string | null;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   profile: Profile | null;
   isLoading: boolean;
   userName: string;
+  isPartner: boolean;
   refreshProfile: () => Promise<void>;
 }
 
@@ -31,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('id, name, avatar_url')
+        .select('id, name, avatar_url, app_role')
         .eq('id', userId)
         .single();
 
@@ -113,6 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile,
         isLoading,
         userName,
+        isPartner: profile?.app_role === 'partner',
         refreshProfile,
       }}
     >

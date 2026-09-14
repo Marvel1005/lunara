@@ -5,6 +5,7 @@ import { PartnerSettings } from '@/components/partner/partner-settings';
 import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import { usePartnerViewConnections, useSharedPartnerStatus } from '@/lib/hooks/use-partner';
 import { PartnerDashboard } from '@/components/partner/partner-dashboard';
+import { useAuth } from '@/providers/auth-provider';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 function PartnerView() {
@@ -25,12 +26,22 @@ function PartnerView() {
     );
   }
 
-  if (!activePartnerConn || !sharedStatus) return null;
+  if (!activePartnerConn || !sharedStatus) {
+    return (
+      <div className="p-6 rounded-3xl border border-dashed border-border bg-muted/20 text-center space-y-2">
+        <p className="text-sm font-semibold text-foreground">Nothing shared with you yet</p>
+        <p className="text-xs text-muted-fg leading-relaxed">
+          When your partner enables sharing, their comfort updates will appear here.
+        </p>
+      </div>
+    );
+  }
 
   return <PartnerDashboard status={sharedStatus} />;
 }
 
 export default function PartnerSupportPage() {
+  const { isPartner } = useAuth();
   const { data: partnerViewConns } = usePartnerViewConnections();
   const hasPartnerViewConnection = (partnerViewConns?.length ?? 0) > 0;
 
@@ -41,21 +52,25 @@ export default function PartnerSupportPage() {
         <div className="flex items-center gap-2">
           <Heart className="w-5 h-5 text-primary fill-primary/20" />
           <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-            Partner Comfort Sharing
+            {isPartner ? 'Supporting Your Partner' : 'Partner Comfort Sharing'}
           </h1>
         </div>
         <p className="text-xs sm:text-sm text-muted-fg leading-relaxed">
-          Share gentle cycle status updates and comfort requests with someone you trust so they know how to support you best.
+          {isPartner
+            ? 'Gentle updates your partner chooses to share, so you know how to support them best.'
+            : 'Share gentle cycle status updates and comfort requests with someone you trust so they know how to support you best.'}
         </p>
       </div>
 
-      {/* Primary user: My partner settings */}
-      <section aria-labelledby="my-partner-heading" className="space-y-3">
-        <PartnerSettings />
-      </section>
+      {/* Primary user: My partner settings — members only */}
+      {!isPartner && (
+        <section aria-labelledby="my-partner-heading" className="space-y-3">
+          <PartnerSettings />
+        </section>
+      )}
 
       {/* Partner view: supporting someone else */}
-      {hasPartnerViewConnection && (
+      {(hasPartnerViewConnection || isPartner) && (
         <section aria-labelledby="supporting-heading" className="space-y-3 pt-2">
           <div className="flex items-center gap-2 border-b border-border/60 pb-2">
             <h2

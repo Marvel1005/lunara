@@ -44,6 +44,10 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+-- Ensure partner-role column exists (idempotent)
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS app_role TEXT NOT NULL DEFAULT 'member' CHECK (app_role IN ('member', 'partner'));
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 0. USER ONBOARDING TRIGGER: handle_new_user
 --    Safely handles phone-only users where NEW.email is NULL.
@@ -280,6 +284,11 @@ BEGIN
   UPDATE public.partner_invitations
   SET status = 'accepted', accepted_at = NOW()
   WHERE id = v_invite.id;
+
+  -- ── 13. The acceptor becomes a partner-only user ───────────────────────────
+  UPDATE public.profiles
+  SET app_role = 'partner', updated_at = NOW()
+  WHERE id = v_caller_id;
 
   RETURN jsonb_build_object(
     'success', true,
