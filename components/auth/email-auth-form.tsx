@@ -4,12 +4,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AlertCircle } from 'lucide-react';
+import { OtpInput } from './otp-input';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OTP_LENGTH = 6;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -50,35 +52,25 @@ export function magicLinkErrorMessage(code: string | null): string | null {
   if (code === 'magic_link_invalid')
     return 'That sign-in link is invalid or has expired. Please request a new one to continue.';
   if (code)
-    return 'We couldn’t complete that sign-in. Please try again.';
+    return "We couldn't complete that sign-in. Please try again.";
   return null;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MAGIC LINK SENDER
+// EMAIL + CODE FORM
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface MagicLinkFormProps {
+interface EmailMagicLinkFormProps {
+  mode: 'login' | 'signup';
   switchLink: React.ReactNode;
   redirectTo?: string | null;
-  heading: string;
-  subheading: string;
-  showName?: boolean;
-  buttonLabel: string;
-  successTitle: string;
-  successBody: (email: string) => React.ReactNode;
 }
 
 export function EmailMagicLinkForm({
+  mode,
   switchLink,
   redirectTo,
-  heading,
-  subheading,
-  showName = false,
-  buttonLabel,
-  successTitle,
-  successBody,
-}: MagicLinkFormProps) {
+}: EmailMagicLinkFormProps) {
   const validTarget =
     redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
       ? redirectTo
@@ -94,10 +86,17 @@ export function EmailMagicLinkForm({
   const [code, setCode] = useState('');
   const [verifying, setVerifying] = useState(false);
 
-  const EMAIL_CODE_MIN_INTERVAL_SECONDS = 60;
+  const showName = mode === 'signup';
+  const heading = mode === 'login' ? 'Welcome back' : 'Begin your journey';
+  const subheading =
+    mode === 'login'
+      ? "Enter your email and we'll send you a 6-digit sign-in code. No password needed."
+      : 'Create your Lunara account — no password needed.';
+  const buttonLabel = 'Send sign-in code';
+  const successTitle = 'Check your email';
 
-  // Supabase rate-limits magic-link requests to one per 60s — mirror that in
-  // the UI so repeated clicks can never hit the /otp endpoint early.
+  // ── Cooldown ────────────────────────────────────────────────────────────────
+
   const [cooldown, setCooldown] = useState(0);
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -118,6 +117,8 @@ export function EmailMagicLinkForm({
   useEffect(() => () => {
     if (cooldownRef.current) clearInterval(cooldownRef.current);
   }, []);
+
+  // ── Send code ───────────────────────────────────────────────────────────────
 
   const sendCode = async () => {
     if (cooldown > 0) {
@@ -154,7 +155,7 @@ export function EmailMagicLinkForm({
 
       setSentEmail(normalizeEmail(email));
       setCode('');
-      startCooldown(EMAIL_CODE_MIN_INTERVAL_SECONDS);
+      startCooldown();
     } catch (err: unknown) {
       setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
     } finally {
@@ -167,10 +168,12 @@ export function EmailMagicLinkForm({
     sendCode();
   };
 
+  // ── Verify code ─────────────────────────────────────────────────────────────
+
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (verifying) return;
-    if (code.length < 6 || code.length > 12) {
+    if (code.length !== OTP_LENGTH) {
       setError('Please enter the full code from the email.');
       return;
     }
@@ -197,52 +200,50 @@ export function EmailMagicLinkForm({
     }
   };
 
+  // ── Render: code-entry screen ───────────────────────────────────────────────
+
   if (sentEmail) {
     return (
       <div className="space-y-4 text-center">
         <div className="text-3xl">📬</div>
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
-          <p className="text-xs text-muted-fg leading-relaxed">{successBody(sentEmail)}</p>
+          <p className="text-xs text-muted-fg leading-relaxed">
+            We&apos;ve sent a 6-digit code to{' '}
+            <span className="font-semibold text-foreground">{sentEmail}</span>.
+            {mode === 'login'
+              ? ' Enter it below to finish signing in.'
+              : ' Enter it below to create your account and sign in.'}
+          </p>
           <p className="text-[11px] text-muted-fg/80 leading-relaxed">
             Your code is single-use and expires in 1 hour.
           </p>
         </div>
 
         {error && (
-          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
+          <div
+            className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+            role="alert"
+          >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleVerify} className="space-y-3">
-          <input
-            id="signin-code"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            autoFocus
-            pattern="\d{6,12}"
-            maxLength={12}
-            required
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 12))}
-            placeholder="Enter the code from your email"
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm text-center tracking-[0.5em] font-semibold focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
+          <OtpInput length={OTP_LENGTH} value={code} onChange={setCode} />
           <button
             type="submit"
-            disabled={verifying || code.length !== 6}
+            disabled={verifying || code.length !== OTP_LENGTH}
             className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {verifying ? <span className="animate-pulse">Verifying…</span> : 'Sign in with code'}
+            {verifying ? <span className="animate-pulse">Verifying…</span> : 'Sign in'}
           </button>
         </form>
 
         <div className="space-y-1 text-xs">
           {cooldown > 0 ? (
-            <span className="text-xs text-muted-fg tabular-nums inline-block">
+            <span className="text-muted-fg tabular-nums inline-block">
               Resend in {cooldown}s
             </span>
           ) : (
@@ -267,17 +268,20 @@ export function EmailMagicLinkForm({
     );
   }
 
+  // ── Render: email form ──────────────────────────────────────────────────────
+
   return (
     <div className="space-y-5">
-      {heading && (
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>
-          {subheading && <p className="text-xs text-muted-fg">{subheading}</p>}
-        </div>
-      )}
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>
+        {subheading && <p className="text-xs text-muted-fg">{subheading}</p>}
+      </div>
 
       {error && (
-        <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
+        <div
+          className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+          role="alert"
+        >
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
@@ -286,11 +290,14 @@ export function EmailMagicLinkForm({
       <form onSubmit={handleSubmit} className="space-y-3">
         {showName && (
           <div>
-            <label htmlFor="email-signup-name" className="block text-xs font-semibold text-foreground mb-1.5">
+            <label
+              htmlFor="auth-name"
+              className="block text-xs font-semibold text-foreground mb-1.5"
+            >
               Your name
             </label>
             <input
-              id="email-signup-name"
+              id="auth-name"
               type="text"
               autoComplete="given-name"
               required
@@ -305,11 +312,14 @@ export function EmailMagicLinkForm({
         )}
 
         <div>
-          <label htmlFor="magic-link-email" className="block text-xs font-semibold text-foreground mb-1.5">
+          <label
+            htmlFor="auth-email"
+            className="block text-xs font-semibold text-foreground mb-1.5"
+          >
             Email
           </label>
           <input
-            id="magic-link-email"
+            id="auth-email"
             type="email"
             autoComplete="email"
             required
@@ -325,76 +335,17 @@ export function EmailMagicLinkForm({
           disabled={loading || !email.trim() || (showName && !name.trim()) || cooldown > 0}
           className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading
-            ? <span className="animate-pulse">Sending code…</span>
-            : cooldown > 0
-              ? `Wait ${cooldown}s to send another code`
-              : buttonLabel}
+          {loading ? (
+            <span className="animate-pulse">Sending code…</span>
+          ) : cooldown > 0 ? (
+            `Wait ${cooldown}s to send another code`
+          ) : (
+            buttonLabel
+          )}
         </button>
       </form>
 
-      <div className="text-center pt-3 border-t border-border/50">
-        {switchLink}
-      </div>
+      <div className="text-center pt-3 border-t border-border/50">{switchLink}</div>
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// EMAIL LOGIN FORM
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface EmailLoginFormProps {
-  switchLink: React.ReactNode;
-  redirectTo?: string | null;
-}
-
-export function EmailLoginForm({ switchLink, redirectTo }: EmailLoginFormProps) {
-  return (
-    <EmailMagicLinkForm
-      switchLink={switchLink}
-      redirectTo={redirectTo}
-      heading="Welcome back"
-      subheading="Enter your email and we’ll send you a secure sign-in code. No password needed."
-      buttonLabel="Send sign-in code"
-      successTitle="Check your email"
-      successBody={(email) => (
-        <>
-          We’ve sent a code to{' '}
-          <span className="font-semibold text-foreground">{email}</span>.
-          Enter it below to finish signing in.
-        </>
-      )}
-    />
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// EMAIL SIGNUP FORM
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface EmailSignupFormProps {
-  switchLink: React.ReactNode;
-  redirectTo?: string | null;
-}
-
-export function EmailSignupForm({ switchLink, redirectTo }: EmailSignupFormProps) {
-  return (
-    <EmailMagicLinkForm
-      showName
-      switchLink={switchLink}
-      redirectTo={redirectTo}
-      heading="Begin your journey"
-      subheading="Create your Lunara account — no password needed."
-      buttonLabel="Send sign-in code"
-      successTitle="Check your email"
-      successBody={(email) => (
-        <>
-          We’ve sent a code to{' '}
-          <span className="font-semibold text-foreground">{email}</span>.
-          Enter it below to create your Lunara account and sign in.
-        </>
-      )}
-    />
   );
 }

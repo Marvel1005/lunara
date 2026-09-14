@@ -1,14 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 
-export async function POST(request: NextRequest) {
-  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-  const email = typeof body.email === 'string' ? body.email : null;
-  const token = typeof body.token === 'string' ? body.token : null;
+const VerifySchema = z.object({
+  email: z.string().trim().min(3).max(254).email('Invalid email address.'),
+  token: z.string().regex(/^\d{6}$/, 'Code must be exactly 6 digits.'),
+});
 
-  if (!email || !token) {
-    return NextResponse.json({ error: 'Missing email or code.' }, { status: 400 });
+export async function POST(request: NextRequest) {
+  const body = (await request.json().catch(() => ({}))) as unknown;
+
+  const parsed = VerifySchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Missing or invalid email or code.' },
+      { status: 400 }
+    );
   }
+
+  const { email, token } = parsed.data;
 
   const supabase = createClient();
   const { error } = await supabase.auth.verifyOtp({

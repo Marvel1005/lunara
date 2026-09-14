@@ -1,15 +1,16 @@
-'use client';
-
-import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { EmailSignupForm, magicLinkErrorMessage } from '@/components/auth/email-auth-form';
+import { EmailMagicLinkForm, magicLinkErrorMessage } from '@/components/auth/email-auth-form';
 import { AlertCircle } from 'lucide-react';
 
-function SignUpForm() {
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams?.get('redirectTo') ?? null;
-  const authError = magicLinkErrorMessage(searchParams?.get('error'));
+export default function SignUpPage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+  const redirectTo = typeof searchParams?.redirectTo === 'string' ? searchParams.redirectTo : null;
+  const authError = magicLinkErrorMessage(
+    typeof searchParams?.error === 'string' ? searchParams.error : null
+  );
 
   const switchLink = (
     <p className="text-xs text-muted-fg">
@@ -26,24 +27,20 @@ function SignUpForm() {
   return (
     <div className="space-y-5">
       {authError && (
-        <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2" role="alert">
+        <div
+          className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+          role="alert"
+        >
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{authError}</span>
         </div>
       )}
 
-      <EmailSignupForm
-        redirectTo={redirectTo}
+      <EmailMagicLinkForm
+        mode="signup"
         switchLink={switchLink}
+        redirectTo={redirectTo}
       />
     </div>
-  );
-}
-
-export default function SignUpPage() {
-  return (
-    <Suspense fallback={<div className="py-8 text-center text-xs text-muted-fg">Loading…</div>}>
-      <SignUpForm />
-    </Suspense>
   );
 }
