@@ -3,6 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { ThemeStyle, ThemeMode } from '@/lib/cycle/types';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
+import { usePeriods } from '@/lib/hooks/use-periods';
+import { calculateCycleSummary } from '@/lib/cycle/engine';
 
 interface ThemeContextType {
   themeStyle: ThemeStyle;
@@ -39,13 +41,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setAutoComfortMode = async (enabled: boolean) => {
-    await updateSettings({ auto_theme: enabled });
+    try {
+      await updateSettings({ auto_theme: enabled });
+    } catch (err) {
+      console.error('Failed to save comfort mode setting:', err);
+      throw err;
+    }
   };
 
-  // Determine effective cycle state for the UI
-  // Note: We leave phase determination to the cycle engine/hooks in components,
-  // but allow preview overrides when user toggles previews in Settings.
-  const activeCycleState: ThemeMode = previewState || 'normal';
+  // Determine effective cycle state for the UI.
+  // When automatic comfort mode is on and the user is on their period,
+  // the app softens into comfort visuals. A manual preview (from Settings)
+  // always takes precedence.
+  const { periods } = usePeriods();
+  const summary = calculateCycleSummary(periods, settings);
+  const autoComfortActive = autoComfortMode && summary.isPeriod;
+  const activeCycleState: ThemeMode =
+    previewState || (autoComfortActive ? 'comfort' : 'normal');
   const isComfortMode = activeCycleState === 'comfort';
 
   useEffect(() => {

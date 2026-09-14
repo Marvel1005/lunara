@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useTheme } from '@/providers/theme-provider';
 import { useCycleSummary } from '@/lib/hooks/use-cycle';
 import { useAuth } from '@/providers/auth-provider';
@@ -70,13 +71,15 @@ export function Header({ userName: initialName }: HeaderProps) {
             </span>
           </button>
 
-          {/* User Profile Avatar */}
-          <div
-            className="w-7 h-7 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-[11px] font-bold text-primary-fg shadow-soft border border-white"
+          {/* User Profile Avatar — links to Settings/profile */}
+          <Link
+            href="/settings"
+            className="w-7 h-7 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-[11px] font-bold text-primary-fg shadow-soft border border-white hover:scale-105 transition-transform cursor-pointer"
             title={`Signed in as ${userName}`}
+            aria-label="Open settings and profile"
           >
             {userName.charAt(0).toUpperCase()}
-          </div>
+          </Link>
 
           {/* Simple Direct Sign Out Button */}
           <button
