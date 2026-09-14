@@ -47,15 +47,6 @@ function friendlyVerifyError(msg: string): string {
   return 'Something went wrong. Please request a new code.';
 }
 
-/** Map callback error codes to friendly messages shown on the auth pages. */
-export function magicLinkErrorMessage(code: string | null): string | null {
-  if (code === 'magic_link_invalid')
-    return 'That sign-in link is invalid or has expired. Please request a new one to continue.';
-  if (code)
-    return "We couldn't complete that sign-in. Please try again.";
-  return null;
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // EMAIL + CODE FORM
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { EmailMagicLinkForm, magicLinkErrorMessage } from '@/components/auth/email-auth-form';
+import { EmailMagicLinkForm } from '@/components/auth/email-auth-form';
+import { magicLinkErrorMessage } from '@/lib/auth';
 import { AlertCircle } from 'lucide-react';
 
 export default function SignUpPage({
