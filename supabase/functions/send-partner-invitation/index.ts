@@ -79,6 +79,20 @@ export default {
             invitationError.message
           );
 
+          const rpcMsg = invitationError.message ?? "";
+          if (
+            rpcMsg.includes("uq_pending_partner_invitation") ||
+            rpcMsg.includes("duplicate key")
+          ) {
+            return Response.json(
+              {
+                error:
+                  "You already have a pending invitation for this email. Cancel it in Partner settings to send a new one.",
+              },
+              { status: 409 }
+            );
+          }
+
           return Response.json(
             { error: invitationError.message },
             { status: 400 }
