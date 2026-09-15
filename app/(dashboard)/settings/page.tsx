@@ -33,7 +33,46 @@ export default function SettingsPage() {
     }
   }, [settings]);
 
-  const { user, userName } = useAuth();
+  const { user, userName, profile, refreshProfile } = useAuth();
+
+  // Editable display name (defaults to email prefix for code-login users).
+  const [displayName, setDisplayName] = useState('');
+  const [nameEditing, setNameEditing] = useState(false);
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!nameEditing) setDisplayName(profile?.name ?? userName);
+  }, [profile?.name, userName, nameEditing]);
+
+  const handleSaveName = async () => {
+    const next = displayName.trim();
+    if (next.length < 2) {
+      setNameError('Name must be at least 2 characters.');
+      return;
+    }
+    if (next.length > 60) {
+      setNameError('Name must be under 60 characters.');
+      return;
+    }
+    setNameSaving(true);
+    setNameError(null);
+    try {
+      const supabase = createClient();
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ name: next })
+        .eq('id', user!.id);
+      if (profileError) throw profileError;
+      await supabase.auth.updateUser({ data: { name: next } });
+      await refreshProfile();
+      setNameEditing(false);
+    } catch (err) {
+      setNameError(err instanceof Error ? err.message : 'Could not save name. Please try again.');
+    } finally {
+      setNameSaving(false);
+    }
+  };
 
   const createdDate = user?.created_at
     ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -135,7 +174,47 @@ export default function SettingsPage() {
             {userInfo.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-foreground truncate">{userInfo.name}</h3>
+            {!nameEditing ? (
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-foreground truncate">{userInfo.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => { setDisplayName(profile?.name ?? userName); setNameError(null); setNameEditing(true); }}
+                  className="text-[11px] font-semibold text-primary hover:underline shrink-0"
+                >
+                  Edit
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  aria-label="Display name"
+                  minLength={2}
+                  maxLength={60}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Your display name"
+                  className="min-w-0 flex-1 px-3 py-1.5 rounded-xl bg-muted/60 border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveName}
+                  disabled={nameSaving}
+                  className="px-3 py-1.5 rounded-xl bg-primary text-primary-fg text-xs font-semibold hover:opacity-95 disabled:opacity-50 shrink-0"
+                >
+                  {nameSaving ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setNameEditing(false); setNameError(null); }}
+                  className="text-[11px] font-semibold text-muted-fg hover:text-foreground shrink-0"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+            {nameError && <p className="text-[11px] text-rose-600 mt-1">{nameError}</p>}
             <p className="text-[10px] text-muted-fg font-medium uppercase tracking-wide mt-0.5">{userInfo.accountLabel}</p>
             <p className="text-xs text-muted-fg truncate">{userInfo.accountValue}</p>
             <span className="inline-block text-[10px] font-medium text-primary px-2 py-0.5 rounded-full bg-primary-soft mt-1">
