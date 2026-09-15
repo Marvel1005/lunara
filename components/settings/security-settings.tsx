@@ -71,7 +71,7 @@ export function SecuritySettings() {
           <p className="text-[11px] text-muted-fg">
             {hasPassword
               ? 'A password is set on your account. You can change it below.'
-              : 'You sign in with magic links. Optionally set a password as well.'}
+              : 'You sign in with a sign-in code. Optionally set a password as well.'}
           </p>
         </div>
       </div>
@@ -136,7 +136,7 @@ export function SecuritySettings() {
       </form>
 
       <p className="text-[11px] text-muted-fg leading-relaxed">
-        Magic-link sign-in keeps working whether or not you set a password.
+        Code sign-in keeps working whether or not you set a password.
       </p>
     </div>
   );

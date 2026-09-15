@@ -5,6 +5,7 @@ import { PartnerSettings } from '@/components/partner/partner-settings';
 import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import { usePartnerViewConnections, useSharedPartnerStatus } from '@/lib/hooks/use-partner';
 import { PartnerDashboard } from '@/components/partner/partner-dashboard';
+import { usePartnerMode } from '@/lib/hooks/use-partner-mode';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 function PartnerView() {
@@ -42,6 +43,9 @@ function PartnerView() {
 export default function PartnerSupportPage() {
   const { data: partnerViewConns } = usePartnerViewConnections();
   const hasPartnerViewConnection = (partnerViewConns?.length ?? 0) > 0;
+  // Pure supporters (no own data) get a focused page: no invite card,
+  // only the person they support.
+  const { partnerMode } = usePartnerMode();
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
@@ -58,10 +62,12 @@ export default function PartnerSupportPage() {
         </p>
       </div>
 
-      {/* My partner settings (as the sharer) */}
-      <section aria-labelledby="my-partner-heading" className="space-y-3">
-        <PartnerSettings />
-      </section>
+      {/* My partner settings (as the sharer) — hidden in partner mode */}
+      {!partnerMode && (
+        <section aria-labelledby="my-partner-heading" className="space-y-3">
+          <PartnerSettings />
+        </section>
+      )}
 
       {/* Partner view: supporting someone else */}
       {hasPartnerViewConnection && (
