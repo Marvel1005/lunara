@@ -1,15 +1,17 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { AUTH_NEXT_COOKIE } from '@/lib/auth';
 import { AlertCircle } from 'lucide-react';
+import { OtpInput } from './otp-input';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OTP_LENGTH = 8;
 
 function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -34,8 +36,19 @@ function friendlyEmailError(msg: string): string {
   return 'Something went wrong. Please try again.';
 }
 
+function friendlyVerifyError(msg: string): string {
+  const lower = msg.toLowerCase();
+  if (lower.includes('expired'))
+    return 'That code has expired. Please request a new one.';
+  if (lower.includes('invalid') || lower.includes('incorrect') || lower.includes('not found'))
+    return 'That code is incorrect. Please check and try again.';
+  if (lower.includes('rate limit') || lower.includes('too many'))
+    return 'Too many attempts. Please wait a few minutes before trying again.';
+  return 'Something went wrong. Please request a new code.';
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// EMAIL MAGIC-LINK FORM
+// EMAIL + CODE FORM
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface EmailMagicLinkFormProps {
@@ -54,19 +67,23 @@ export function EmailMagicLinkForm({
       ? redirectTo
       : '/dashboard';
 
+  const router = useRouter();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sentEmail, setSentEmail] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
   const showName = mode === 'signup';
   const heading = mode === 'login' ? 'Welcome back' : 'Begin your journey';
   const subheading =
     mode === 'login'
-      ? "Enter your email and we'll send you a secure sign-in link. No password needed."
-      : 'Create your Lunara account with just your email — no password needed.';
-  const buttonLabel = mode === 'login' ? 'Send sign-in link' : 'Create account';
+      ? "Enter your email and we'll send you an 8-digit sign-in code. No password needed."
+      : 'Create your Lunara account — no password needed.';
+  const buttonLabel = 'Send sign-in code';
   const successTitle = 'Check your email';
 
   // ── Cooldown ────────────────────────────────────────────────────────────────
@@ -92,11 +109,11 @@ export function EmailMagicLinkForm({
     if (cooldownRef.current) clearInterval(cooldownRef.current);
   }, []);
 
-  // ── Send magic link ─────────────────────────────────────────────────────────
+  // ── Send code ───────────────────────────────────────────────────────────────
 
-  const sendLink = async () => {
+  const sendCode = async () => {
     if (cooldown > 0) {
-      setError('Please wait a moment before requesting another link.');
+      setError('Please wait a moment before requesting another code.');
       return;
     }
 
@@ -109,16 +126,10 @@ export function EmailMagicLinkForm({
     setLoading(true);
     setError(null);
     try {
-      // Carry the post-auth destination in a same-origin cookie so the
-      // callback can redirect without any ?next= query parameter.
-      document.cookie =
-        `${AUTH_NEXT_COOKIE}=${encodeURIComponent(validTarget)}; path=/; max-age=600; samesite=lax`;
-
       const supabase = createClient();
       const { error: sendError } = await supabase.auth.signInWithOtp({
         email: normalizeEmail(email),
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
           ...(showName && name.trim() ? { data: { name: name.trim() } } : {}),
         },
       });
@@ -134,6 +145,7 @@ export function EmailMagicLinkForm({
       }
 
       setSentEmail(normalizeEmail(email));
+      setCode('');
       startCooldown();
     } catch (err: unknown) {
       setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
@@ -144,10 +156,42 @@ export function EmailMagicLinkForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendLink();
+    sendCode();
   };
 
-  // ── Render: link-sent screen ────────────────────────────────────────────────
+  // ── Verify code ─────────────────────────────────────────────────────────────
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (verifying) return;
+    if (code.length !== OTP_LENGTH) {
+      setError('Please enter the full code from the email.');
+      return;
+    }
+
+    setVerifying(true);
+    setError(null);
+    try {
+      const res = await fetch('/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sentEmail, token: code }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(friendlyVerifyError(data.error ?? 'Verification failed.'));
+        return;
+      }
+      router.push(validTarget);
+      router.refresh();
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  // ── Render: code-entry screen ───────────────────────────────────────────────
 
   if (sentEmail) {
     return (
@@ -156,14 +200,14 @@ export function EmailMagicLinkForm({
         <div className="space-y-1">
           <h2 className="text-lg font-bold text-foreground">{successTitle}</h2>
           <p className="text-xs text-muted-fg leading-relaxed">
-            We&apos;ve sent a secure sign-in link to{' '}
+            We&apos;ve sent an 8-digit code to{' '}
             <span className="font-semibold text-foreground">{sentEmail}</span>.
             {mode === 'login'
-              ? ' Open it on this device to finish signing in.'
-              : ' Open it on this device to create your account and sign in.'}
+              ? ' Enter it below to finish signing in.'
+              : ' Enter it below to create your account and sign in.'}
           </p>
           <p className="text-[11px] text-muted-fg/80 leading-relaxed">
-            The link is single-use and expires in 1 hour.
+            Your code is single-use and expires in 1 hour.
           </p>
         </div>
 
@@ -177,6 +221,17 @@ export function EmailMagicLinkForm({
           </div>
         )}
 
+        <form onSubmit={handleVerify} className="space-y-3">
+          <OtpInput length={OTP_LENGTH} value={code} onChange={setCode} />
+          <button
+            type="submit"
+            disabled={verifying || code.length !== OTP_LENGTH}
+            className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {verifying ? <span className="animate-pulse">Verifying…</span> : 'Sign in'}
+          </button>
+        </form>
+
         <div className="space-y-1 text-xs">
           {cooldown > 0 ? (
             <span className="text-muted-fg tabular-nums inline-block">
@@ -186,16 +241,16 @@ export function EmailMagicLinkForm({
             <button
               type="button"
               disabled={loading}
-              onClick={sendLink}
+              onClick={sendCode}
               className="font-semibold text-primary hover:underline disabled:opacity-50"
             >
-              Resend link
+              Resend code
             </button>
           )}
         </div>
         <button
           type="button"
-          onClick={() => { setSentEmail(null); setError(null); setCooldown(0); }}
+          onClick={() => { setSentEmail(null); setError(null); setCooldown(0); setCode(''); }}
           className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
         >
           Use a different email
@@ -272,9 +327,9 @@ export function EmailMagicLinkForm({
           className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
-            <span className="animate-pulse">Sending link…</span>
+            <span className="animate-pulse">Sending code…</span>
           ) : cooldown > 0 ? (
-            `Wait ${cooldown}s to send another link`
+            `Wait ${cooldown}s to send another code`
           ) : (
             buttonLabel
           )}
