@@ -378,18 +378,7 @@ export function EmailMagicLinkForm({
           Use a sign-in code instead
         </button>
 
-      <div className="text-center pt-3 border-t border-border/50 space-y-2">
-        {mode === 'login' && (
-          <button
-            type="button"
-            onClick={() => switchMethod('password')}
-            className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
-          >
-            Have a password? Sign in with it instead
-          </button>
-        )}
-        {switchLink}
-      </div>
+        <div className="text-center pt-3 border-t border-border/50">{switchLink}</div>
       </div>
     );
   }
@@ -471,7 +460,18 @@ export function EmailMagicLinkForm({
         </button>
       </form>
 
-      <div className="text-center pt-3 border-t border-border/50">{switchLink}</div>
+      <div className="text-center pt-3 border-t border-border/50 space-y-2">
+        {mode === 'login' && (
+          <button
+            type="button"
+            onClick={() => switchMethod('password')}
+            className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
+          >
+            Have a password? Sign in with it instead
+          </button>
+        )}
+        {switchLink}
+      </div>
     </div>
   );
 }
