@@ -76,6 +76,9 @@ export function EmailMagicLinkForm({
   const [sentEmail, setSentEmail] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [verifying, setVerifying] = useState(false);
+  // Login offers both methods; signup stays code-only (no password at signup).
+  const [method, setMethod] = useState<'code' | 'password'>('code');
+  const [password, setPassword] = useState('');
 
   const showName = mode === 'signup';
   const heading = mode === 'login' ? 'Welcome back' : 'Begin your journey';
@@ -191,6 +194,52 @@ export function EmailMagicLinkForm({
     }
   };
 
+  // ── Sign in with password (login only, for accounts that set one) ──────────
+
+  const handlePasswordSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationError = validateEmail(email);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: normalizeEmail(email),
+        password,
+      });
+      if (signInError) {
+        const lower = signInError.message.toLowerCase();
+        if (lower.includes('invalid') && lower.includes('credential')) {
+          setError('Incorrect email or password. If you never set a password, use a sign-in code instead.');
+        } else {
+          setError(friendlyEmailError(signInError.message));
+        }
+        return;
+      }
+      router.push(validTarget);
+      router.refresh();
+    } catch (err: unknown) {
+      setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMethod = (next: 'code' | 'password') => {
+    setMethod(next);
+    setError(null);
+    setPassword('');
+  };
+
   // ── Render: code-entry screen ───────────────────────────────────────────────
 
   if (sentEmail) {
@@ -255,6 +304,92 @@ export function EmailMagicLinkForm({
         >
           Use a different email
         </button>
+      </div>
+    );
+  }
+
+  // ── Render: password sign-in (login only) ───────────────────────────────────
+
+  if (mode === 'login' && method === 'password' && !sentEmail) {
+    return (
+      <div className="space-y-5">
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{heading}</h2>
+          <p className="text-xs text-muted-fg">Enter your email and the password you set earlier.</p>
+        </div>
+
+        {error && (
+          <div
+            className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+            role="alert"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePasswordSignIn} className="space-y-3">
+          <div>
+            <label htmlFor="auth-email" className="block text-xs font-semibold text-foreground mb-1.5">
+              Email
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="auth-password" className="block text-xs font-semibold text-foreground mb-1.5">
+              Password
+            </label>
+            <input
+              id="auth-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !email.trim() || !password}
+            className="w-full h-[52px] rounded-2xl bg-primary text-primary-fg text-sm font-semibold shadow-comfort hover:opacity-95 transition-all flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? <span className="animate-pulse">Signing in…</span> : 'Sign in'}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          onClick={() => switchMethod('code')}
+          className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
+        >
+          Use a sign-in code instead
+        </button>
+
+      <div className="text-center pt-3 border-t border-border/50 space-y-2">
+        {mode === 'login' && (
+          <button
+            type="button"
+            onClick={() => switchMethod('password')}
+            className="block mx-auto text-xs text-muted-fg font-semibold hover:text-foreground hover:underline"
+          >
+            Have a password? Sign in with it instead
+          </button>
+        )}
+        {switchLink}
+      </div>
       </div>
     );
   }
