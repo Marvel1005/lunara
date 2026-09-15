@@ -843,9 +843,11 @@ BEGIN
   END IF;
 
   IF v_perms.share_pain_status THEN
+    -- ±1 day window: the app stores the device-local date while CURRENT_DATE
+    -- follows the database timezone, so strict equality misses logs near midnight.
     SELECT * INTO v_latest_pain FROM public.pain_logs
-    WHERE user_id = v_connection.user_id AND date = CURRENT_DATE
-    ORDER BY created_at DESC LIMIT 1;
+    WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
+    ORDER BY date DESC, created_at DESC LIMIT 1;
 
     IF v_latest_pain IS NOT NULL AND v_latest_pain.severity > 0 THEN
       v_result := v_result || jsonb_build_object('has_pain_today', TRUE, 'pain_status_message', 'Experiencing a painful day');
@@ -865,8 +867,8 @@ BEGIN
 
   IF v_perms.share_mood THEN
     SELECT * INTO v_latest_mood FROM public.mood_logs
-    WHERE user_id = v_connection.user_id AND date = CURRENT_DATE
-    ORDER BY created_at DESC LIMIT 1;
+    WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
+    ORDER BY date DESC, created_at DESC LIMIT 1;
 
     IF v_latest_mood IS NOT NULL THEN
       v_result := v_result || jsonb_build_object('mood', v_latest_mood.mood, 'mood_intensity', v_latest_mood.intensity);
@@ -875,8 +877,8 @@ BEGIN
 
   IF v_perms.share_sleep OR v_perms.share_water OR v_perms.share_energy THEN
     SELECT * INTO v_latest_wellness FROM public.wellness_logs
-    WHERE user_id = v_connection.user_id AND date = CURRENT_DATE
-    ORDER BY created_at DESC LIMIT 1;
+    WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
+    ORDER BY date DESC, created_at DESC LIMIT 1;
 
     IF v_latest_wellness IS NOT NULL THEN
       IF v_perms.share_sleep THEN
