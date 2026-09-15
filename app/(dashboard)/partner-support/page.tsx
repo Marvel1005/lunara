@@ -37,7 +37,7 @@ function PartnerView() {
     );
   }
 
-  return <PartnerDashboard status={sharedStatus} />;
+  return <PartnerDashboard status={sharedStatus} connectionId={activePartnerConn.connection_id} />;
 }
 
 export default function PartnerSupportPage() {

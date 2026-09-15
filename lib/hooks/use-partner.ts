@@ -8,6 +8,7 @@ import type {
   CreateInvitationResult,
   AcceptInvitationResult,
   PartnerPermissions,
+  PartnerSuggestion,
 } from '@/lib/partner/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -206,6 +207,9 @@ export function useSharedPartnerStatus(connection_id: string | null) {
   return useQuery<SharedPartnerStatus>({
     queryKey: ['shared_partner_status', connection_id],
     enabled: !!connection_id,
+    // Owner logs (pain, mood, wellness) should reach the partner quickly.
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_shared_partner_status', {
         p_connection_id: connection_id!,
@@ -213,7 +217,6 @@ export function useSharedPartnerStatus(connection_id: string | null) {
       if (error) throw new Error(error.message);
       return data as SharedPartnerStatus;
     },
-    refetchInterval: 60_000, // refresh every 60s
   });
 }
 
@@ -234,6 +237,67 @@ export function useAcceptInvitation() {
       queryClient.invalidateQueries({ queryKey: ['shared_partner_status'] });
     },
   });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PARTNER SUGGESTIONS (remedy/comfort notes from the supporting partner)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function usePartnerSuggestions(connection_id: string | null) {
+  const queryClient = useQueryClient();
+  const supabase = createClient();
+
+  const query = useQuery<PartnerSuggestion[]>({
+    queryKey: ['partner_suggestions', connection_id],
+    enabled: !!connection_id,
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('partner_suggestions')
+        .select('id, connection_id, author_user_id, body, created_at')
+        .eq('connection_id', connection_id!)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw new Error(error.message);
+      return (data as PartnerSuggestion[]) ?? [];
+    },
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async (body: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabase
+        .from('partner_suggestions')
+        .insert({ connection_id: connection_id!, author_user_id: user.id, body: body.trim().slice(0, 500) })
+        .select('id, connection_id, author_user_id, body, created_at')
+        .single();
+      if (error) throw new Error(error.message);
+      return data as PartnerSuggestion;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partner_suggestions', connection_id] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (suggestion_id: string) => {
+      const { error } = await supabase.from('partner_suggestions').delete().eq('id', suggestion_id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partner_suggestions', connection_id] });
+    },
+  });
+
+  return {
+    suggestions: query.data ?? [],
+    isLoading: query.isLoading,
+    sendSuggestion: sendMutation.mutateAsync,
+    isSending: sendMutation.isPending,
+    deleteSuggestion: deleteMutation.mutateAsync,
+  };
 }
 
 // Connections where the current user is the *partner* (not the primary owner)

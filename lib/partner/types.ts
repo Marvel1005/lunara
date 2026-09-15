@@ -61,3 +61,11 @@ export interface AcceptInvitationResult {
   connection_id: string;
   status: PartnerConnectionStatus;
 }
+
+export interface PartnerSuggestion {
+  id: string;
+  connection_id: string;
+  author_user_id: string;
+  body: string;
+  created_at: string;
+}

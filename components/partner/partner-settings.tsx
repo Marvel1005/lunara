@@ -14,7 +14,7 @@ import {
   ChevronDown,
   CheckCircle2,
 } from 'lucide-react';
-import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
+import { useMyPartnerConnections, usePartnerSuggestions } from '@/lib/hooks/use-partner';
 import { PartnerConnectFlow } from '@/components/partner/partner-connect-flow';
 import { PartnerPermissionsEditor } from '@/components/partner/partner-permissions';
 import type { PartnerConnectionItem } from '@/lib/partner/types';
@@ -38,6 +38,11 @@ export function PartnerSettings() {
   const [showPermissions, setShowPermissions] = useState(false);
   const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Remedy suggestions the partner sent (owner reads them here).
+  const { suggestions: partnerSuggestions } = usePartnerSuggestions(
+    liveConnection?.connection_id ?? null
+  );
 
   const handlePause = async (c: PartnerConnectionItem) => {
     setActionError(null);
@@ -287,6 +292,29 @@ export function PartnerSettings() {
                 </div>
               )}
             </div>
+
+            {/* Suggestions from partner */}
+            {partnerSuggestions.length > 0 && (
+              <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-border shadow-soft space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-primary fill-primary/20" />
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">Suggestions from your partner</h3>
+                    <p className="text-xs text-muted-fg">Kind notes they shared to support you</p>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {partnerSuggestions.map((s) => (
+                    <li
+                      key={s.id}
+                      className="p-3 rounded-xl bg-muted/40 border border-border/70 text-xs text-foreground leading-relaxed"
+                    >
+                      &ldquo;{s.body}&rdquo;
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Disconnect Control */}
             <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-border shadow-soft">

@@ -198,6 +198,17 @@ CREATE TABLE IF NOT EXISTS public.partner_permissions (
 
 CREATE INDEX IF NOT EXISTS idx_partner_permissions_connection_id ON public.partner_permissions(connection_id);
 
+-- 14. PARTNER SUGGESTIONS TABLE (remedy/comfort suggestions from partner to owner)
+CREATE TABLE IF NOT EXISTS public.partner_suggestions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  connection_id UUID NOT NULL REFERENCES public.partner_connections(id) ON DELETE CASCADE,
+  author_user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  body TEXT NOT NULL CHECK (char_length(body) BETWEEN 1 AND 500),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_partner_suggestions_connection_id ON public.partner_suggestions(connection_id);
+
 -- ============================================================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================================================
@@ -227,6 +238,7 @@ ALTER TABLE public.preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_connections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_permissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.partner_suggestions ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
@@ -285,6 +297,39 @@ DROP POLICY IF EXISTS "Inviter can view own invitations" ON public.partner_invit
 CREATE POLICY "Inviter can view own invitations"
 ON public.partner_invitations FOR SELECT TO authenticated
 USING (auth.uid() = inviter_user_id);
+
+-- Partner suggestions policies:
+-- both participants can read; only the supporting partner can write;
+-- authors can delete their own suggestions.
+DROP POLICY IF EXISTS "Participants can view suggestions" ON public.partner_suggestions;
+CREATE POLICY "Participants can view suggestions"
+ON public.partner_suggestions FOR SELECT TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.partner_connections pc
+    WHERE pc.id = partner_suggestions.connection_id
+      AND (pc.user_id = auth.uid() OR pc.partner_user_id = auth.uid())
+      AND pc.status IN ('active', 'paused')
+  )
+);
+
+DROP POLICY IF EXISTS "Supporting partner can suggest" ON public.partner_suggestions;
+CREATE POLICY "Supporting partner can suggest"
+ON public.partner_suggestions FOR INSERT TO authenticated
+WITH CHECK (
+  author_user_id = auth.uid()
+  AND EXISTS (
+    SELECT 1 FROM public.partner_connections pc
+    WHERE pc.id = partner_suggestions.connection_id
+      AND pc.partner_user_id = auth.uid()
+      AND pc.status = 'active'
+  )
+);
+
+DROP POLICY IF EXISTS "Authors can delete own suggestions" ON public.partner_suggestions;
+CREATE POLICY "Authors can delete own suggestions"
+ON public.partner_suggestions FOR DELETE TO authenticated
+USING (author_user_id = auth.uid());
 
 -- Partner permissions policy (SELECT only)
 DROP POLICY IF EXISTS "Primary user can select permissions" ON public.partner_permissions;
@@ -905,4 +950,5 @@ GRANT EXECUTE ON FUNCTION public.get_shared_partner_status(UUID) TO authenticate
 ALTER TABLE public.partner_connections FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_invitations FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_permissions FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.partner_suggestions FORCE ROW LEVEL SECURITY;
 

@@ -1,7 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Send, Trash2 } from 'lucide-react';
 import type { SharedPartnerStatus } from '@/lib/partner/types';
+import { usePartnerSuggestions } from '@/lib/hooks/use-partner';
+import { useAuth } from '@/providers/auth-provider';
 
 const SUPPORTIVE_TIPS = [
   'Check in gently — a simple message can mean a lot.',
@@ -14,9 +17,27 @@ const SUPPORTIVE_TIPS = [
 
 interface PartnerDashboardProps {
   status: SharedPartnerStatus;
+  connectionId: string;
 }
 
-export function PartnerDashboard({ status }: PartnerDashboardProps) {
+export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps) {
+  const { user } = useAuth();
+  const { suggestions, sendSuggestion, isSending, deleteSuggestion } =
+    usePartnerSuggestions(connectionId);
+  const [draft, setDraft] = useState('');
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  const handleSend = async () => {
+    const text = draft.trim();
+    if (!text || isSending) return;
+    setSendError(null);
+    try {
+      await sendSuggestion(text);
+      setDraft('');
+    } catch {
+      setSendError('Could not send your suggestion. Please try again.');
+    }
+  };
   const userName = status.user_name ?? 'Your Partner';
   const isNothingShared =
     !!status.shared_summary ||
@@ -186,6 +207,62 @@ export function PartnerDashboard({ status }: PartnerDashboardProps) {
           )}
         </div>
       )}
+
+      {/* Suggest a remedy */}
+      <div className="p-4 rounded-3xl bg-card border border-border shadow-soft space-y-3">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-fg">Suggest a remedy</p>
+          <p className="text-[11px] text-muted-fg mt-0.5">
+            {userName} will see your note. Kind words only.
+          </p>
+        </div>
+
+        {suggestions.length > 0 && (
+          <ul className="space-y-2">
+            {suggestions.map((s) => (
+              <li
+                key={s.id}
+                className="p-2.5 rounded-xl bg-muted/40 border border-border/70 text-xs flex items-start justify-between gap-2"
+              >
+                <span className="text-foreground leading-relaxed">&ldquo;{s.body}&rdquo;</span>
+                {user && s.author_user_id === user.id && (
+                  <button
+                    type="button"
+                    onClick={() => deleteSuggestion(s.id)}
+                    className="text-muted-fg hover:text-rose-600 shrink-0 p-1"
+                    aria-label="Delete suggestion"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {sendError && <p className="text-[11px] text-rose-600">{sendError}</p>}
+
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSend(); }}
+            placeholder="e.g. Warm tea and a hot water bag?"
+            maxLength={500}
+            className="min-w-0 flex-1 px-3 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-fg focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <button
+            type="button"
+            onClick={handleSend}
+            disabled={isSending || !draft.trim()}
+            className="p-2.5 rounded-xl bg-primary text-primary-fg hover:opacity-90 transition-all disabled:opacity-50 shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Send suggestion"
+          >
+            <Send className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
 
       {/* Supportive suggestions */}
       <div className="p-4 rounded-3xl bg-muted/40 border border-border/60 space-y-3">
