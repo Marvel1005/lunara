@@ -353,3 +353,10 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Hide browser-native password reveal buttons (Chrome/Edge/1Password) */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-ms-clear,
+input[type="password"]::-ms-reveal {
+  display: none !important;
+}

@@ -27,7 +27,9 @@ export function PasswordInput({ label, error, id, className = '', ...props }: Pa
         <input
           id={inputId}
           type={visible ? 'text' : 'password'}
-          className={`w-full px-4 py-3 pr-11 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px] ${
+          data-1p-ignore
+          autoComplete={props.autoComplete || 'off'}
+          className={`w-full px-4 py-3 pr-11 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px] [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden ${
             error ? 'border-rose-400 focus:ring-rose-400/40' : ''
           } ${className}`}
           {...props}
