@@ -2,6 +2,11 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { env } from '@/lib/env';
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ms));
+  return Promise.race([promise, timeout]);
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -34,9 +39,8 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const result = await withTimeout(supabase.auth.getUser(), 5000);
+  const user = result?.data?.user ?? null;
 
   const pathname = request.nextUrl.pathname;
 
