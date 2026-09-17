@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { AlertCircle } from 'lucide-react';
 import { OtpInput } from './otp-input';
+import { PasswordInput, validatePassword } from '@/components/password-input';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -346,18 +347,14 @@ export function EmailMagicLinkForm({
           </div>
 
           <div>
-            <label htmlFor="auth-password" className="block text-xs font-semibold text-foreground mb-1.5">
-              Password
-            </label>
-            <input
+            <PasswordInput
               id="auth-password"
-              type="password"
+              label="Password"
               autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Your password"
-              className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
             />
           </div>
 

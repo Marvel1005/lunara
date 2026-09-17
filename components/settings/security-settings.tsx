@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/providers/auth-provider';
-
-const MIN_PASSWORD_LENGTH = 8;
+import { PasswordInput, validatePassword } from '@/components/password-input';
 
 /**
  * One-time password setup. Passwords are owned entirely by Supabase Auth
@@ -28,8 +27,9 @@ export function SecuritySettings() {
     setError(null);
     setSuccess(false);
 
-    if (password.length < MIN_PASSWORD_LENGTH) {
-      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
     if (password !== confirm) {
@@ -91,38 +91,30 @@ export function SecuritySettings() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label htmlFor="new-password" className="block text-xs font-semibold text-foreground mb-1.5">
-            {hasPassword ? 'New password' : 'Set password'}
-          </label>
-          <input
-            id="new-password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={MIN_PASSWORD_LENGTH}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
-        </div>
+        <PasswordInput
+          id="new-password"
+          label={hasPassword ? 'New password' : 'Set password'}
+          autoComplete="new-password"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Upper, lower, number — at least 8 chars"
+        />
 
-        <div>
-          <label htmlFor="confirm-password" className="block text-xs font-semibold text-foreground mb-1.5">
-            Confirm password
-          </label>
-          <input
-            id="confirm-password"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="Repeat the password"
-            className="w-full px-4 py-3 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px]"
-          />
-        </div>
+        <PasswordInput
+          id="confirm-password"
+          label="Confirm password"
+          autoComplete="new-password"
+          required
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          placeholder="Repeat the password"
+          error={
+            confirm && password !== confirm
+              ? 'Passwords do not match.'
+              : undefined
+          }
+        />
 
         <div className="flex justify-end pt-1">
           <button
