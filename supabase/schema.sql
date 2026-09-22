@@ -978,7 +978,7 @@ $$;
 
 DO $$
 DECLARE
-  r RECORD;
+  stmt TEXT;
   v_statements TEXT[] := ARRAY[
     'REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated',
     'REVOKE EXECUTE ON FUNCTION public.create_partner_invitation(text, text) FROM PUBLIC, anon, authenticated',
@@ -993,10 +993,10 @@ DECLARE
     'REVOKE EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) FROM PUBLIC, anon, authenticated'
   ];
 BEGIN
-  FOREACH r IN ARRAY (SELECT * FROM unnest(v_statements))
+  FOREACH stmt IN ARRAY v_statements
   LOOP
     BEGIN
-      EXECUTE r.unnest;
+      EXECUTE stmt;
     EXCEPTION WHEN undefined_function THEN
       -- Function not created yet (e.g. partial run order) — skip safely.
       NULL;
