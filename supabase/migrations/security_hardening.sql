@@ -6,20 +6,36 @@
 -- 1. REVOKE EXECUTE from ALL roles, then grant only to authenticated
 -- ---------------------------------------------------------------------------
 
-REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.create_partner_invitation(text, text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.cancel_partner_invitation(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.accept_partner_invitation(text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.update_partner_permissions(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.pause_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.resume_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_my_partner_connections() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM PUBLIC, anon, authenticated;
+DO $$
+DECLARE
+  stmt TEXT;
+  v_statements TEXT[] := ARRAY[
+    'REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.create_partner_invitation(text, text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.cancel_partner_invitation(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.accept_partner_invitation(text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.update_partner_permissions(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.pause_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.resume_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_my_partner_connections() FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) FROM PUBLIC, anon, authenticated'
+  ];
+BEGIN
+  FOREACH stmt IN ARRAY v_statements
+  LOOP
+    BEGIN
+      EXECUTE stmt;
+    EXCEPTION WHEN undefined_function THEN
+      NULL;
+    END;
+  END LOOP;
+END;
+$$;
 
 -- Grant only the functions the app needs from authenticated users
+-- (preview is called by /partner/accept page, so it must stay granted)
 GRANT EXECUTE ON FUNCTION public.create_partner_invitation(text, text) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.cancel_partner_invitation(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.accept_partner_invitation(text) TO authenticated;
@@ -29,8 +45,9 @@ GRANT EXECUTE ON FUNCTION public.resume_partner_connection(uuid) TO authenticate
 GRANT EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_my_partner_connections() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) TO authenticated;
 
--- Do NOT grant: handle_new_user (trigger only), get_partner_invitation_preview, rls_auto_enable
+-- Do NOT grant: handle_new_user (trigger only)
 
 -- 2. MISSING INDEX
 -- ---------------------------------------------------------------------------

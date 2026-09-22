@@ -903,22 +903,107 @@ END;
 $$;
 
 -- ============================================================================
+-- PARTNER INVITATION PREVIEW (called by /partner/accept page before accepting)
+-- Defined here so schema.sql is self-contained; the phone-auth migration
+-- re-defines it identically (CREATE OR REPLACE = idempotent).
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.get_partner_invitation_preview(
+  p_raw_token TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, extensions, pg_temp
+AS $$
+DECLARE
+  v_token_hash TEXT;
+  v_invite RECORD;
+  v_inviter_name TEXT;
+  v_caller_id UUID;
+  v_caller_email TEXT;
+BEGIN
+  v_caller_id := auth.uid();
+  IF v_caller_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  IF p_raw_token IS NULL OR LENGTH(p_raw_token) <> 48 THEN
+    RAISE EXCEPTION 'Invalid invitation token';
+  END IF;
+
+  v_token_hash := encode(digest(p_raw_token, 'sha256'), 'hex');
+
+  SELECT * INTO v_invite
+  FROM public.partner_invitations
+  WHERE token_hash = v_token_hash;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Invalid or expired invitation token';
+  END IF;
+
+  IF v_invite.status <> 'pending' THEN
+    RAISE EXCEPTION 'Invitation is no longer valid';
+  END IF;
+
+  IF v_invite.expires_at <= NOW() THEN
+    RAISE EXCEPTION 'Invitation has expired';
+  END IF;
+
+  IF v_invite.inviter_user_id = v_caller_id THEN
+    RAISE EXCEPTION 'You cannot accept your own invitation';
+  END IF;
+
+  SELECT LOWER(email) INTO v_caller_email FROM auth.users WHERE id = v_caller_id;
+  IF v_caller_email IS NOT NULL AND LOWER(v_invite.invitee_email) <> v_caller_email THEN
+    RAISE EXCEPTION 'This invitation was sent to a different email address';
+  END IF;
+
+  SELECT name INTO v_inviter_name FROM public.profiles WHERE id = v_invite.inviter_user_id;
+
+  RETURN jsonb_build_object(
+    'valid', true,
+    'invitation_id', v_invite.id,
+    'inviter_name', COALESCE(v_inviter_name, v_invite.partner_name, 'Your partner'),
+    'invitee_email', v_invite.invitee_email,
+    'expires_at', v_invite.expires_at
+  );
+END;
+$$;
+
+-- ============================================================================
 -- REMOVE ALL PUBLIC EXECUTION & FORCE RLS
+-- NOTE: plain REVOKE aborts with 42883 if the function does not exist yet,
+-- so each revoke is guarded by an existence check.
 -- ============================================================================
 
--- Revoke from all roles first (idempotent)
-REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.create_partner_invitation(text, text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.cancel_partner_invitation(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.accept_partner_invitation(text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.update_partner_permissions(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.pause_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.resume_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_my_partner_connections() FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) FROM PUBLIC, anon, authenticated;
-REVOKE EXECUTE ON FUNCTION public.rls_auto_enable() FROM PUBLIC, anon, authenticated;
+DO $$
+DECLARE
+  r RECORD;
+  v_statements TEXT[] := ARRAY[
+    'REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.create_partner_invitation(text, text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.cancel_partner_invitation(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.accept_partner_invitation(text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.update_partner_permissions(uuid, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, boolean, text) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.pause_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.resume_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_my_partner_connections() FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) FROM PUBLIC, anon, authenticated',
+    'REVOKE EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) FROM PUBLIC, anon, authenticated'
+  ];
+BEGIN
+  FOREACH r IN ARRAY (SELECT * FROM unnest(v_statements))
+  LOOP
+    BEGIN
+      EXECUTE r.unnest;
+    EXCEPTION WHEN undefined_function THEN
+      -- Function not created yet (e.g. partial run order) — skip safely.
+      NULL;
+    END;
+  END LOOP;
+END;
+$$;
 
 -- Grant only to authenticated for functions the app needs
 GRANT EXECUTE ON FUNCTION public.create_partner_invitation(text, text) TO authenticated;
@@ -930,8 +1015,9 @@ GRANT EXECUTE ON FUNCTION public.resume_partner_connection(uuid) TO authenticate
 GRANT EXECUTE ON FUNCTION public.revoke_partner_connection(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_my_partner_connections() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_shared_partner_status(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_partner_invitation_preview(text) TO authenticated;
 
--- Do NOT grant: handle_new_user (trigger only), get_partner_invitation_preview, rls_auto_enable
+-- Do NOT grant: handle_new_user (trigger only)
 
 -- FORCE RLS FOR TABLE OWNERS (DEFENSE-IN-DEPTH)
 ALTER TABLE public.partner_connections FORCE ROW LEVEL SECURITY;
