@@ -210,6 +210,17 @@ CREATE TABLE IF NOT EXISTS public.partner_suggestions (
 CREATE INDEX IF NOT EXISTS idx_partner_suggestions_connection_id ON public.partner_suggestions(connection_id);
 CREATE INDEX IF NOT EXISTS idx_partner_suggestions_author_user_id ON public.partner_suggestions(author_user_id);
 
+-- 15. MOVIE WATCHLIST TABLE (Supabase-backed; replaces legacy localStorage)
+CREATE TABLE IF NOT EXISTS public.movie_watchlist (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  movie_id TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT uq_movie_watchlist_user_movie UNIQUE (user_id, movie_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_movie_watchlist_user_id ON public.movie_watchlist(user_id);
+
 -- ============================================================================
 -- INDEXES FOR PERFORMANCE
 -- ============================================================================
@@ -240,6 +251,7 @@ ALTER TABLE public.partner_connections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_invitations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_permissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.movie_watchlist ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
@@ -331,6 +343,12 @@ DROP POLICY IF EXISTS "Authors can delete own suggestions" ON public.partner_sug
 CREATE POLICY "Authors can delete own suggestions"
 ON public.partner_suggestions FOR DELETE TO authenticated
 USING (author_user_id = (SELECT auth.uid()));
+
+-- Movie watchlist policies
+DROP POLICY IF EXISTS "Users can manage own movie_watchlist" ON public.movie_watchlist;
+CREATE POLICY "Users can manage own movie_watchlist"
+ON public.movie_watchlist FOR ALL
+USING ((SELECT auth.uid()) = user_id);
 
 -- Partner permissions policy (SELECT only)
 DROP POLICY IF EXISTS "Primary user can select permissions" ON public.partner_permissions;
@@ -1024,4 +1042,5 @@ ALTER TABLE public.partner_connections FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_invitations FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_permissions FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.partner_suggestions FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.movie_watchlist FORCE ROW LEVEL SECURITY;
 

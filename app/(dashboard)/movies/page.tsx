@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Film, Bookmark, BookmarkCheck, ExternalLink, Sparkles } from 'lucide-react';
 import { useTodayMood, useTodayWellness } from '@/lib/hooks/use-wellness';
+import { useWatchlist } from '@/lib/hooks/use-watchlist';
+import { DataErrorBanner } from '@/components/data-error-banner';
 
 type MovieCategory = 'all' | 'watchlist' | 'low-energy' | 'warm-heart' | 'nostalgia' | 'anime';
 
@@ -120,32 +122,23 @@ const allMovies: MovieItem[] = [
 
 export default function MoviesPage() {
   const [activeCategory, setActiveCategory] = useState<MovieCategory>('all');
-  const [watchlist, setWatchlist] = useState<string[]>([]);
 
   const { mood } = useTodayMood();
   const { energy } = useTodayWellness();
+  const {
+    watchlist,
+    isError: watchlistError,
+    refetchWatchlist,
+    toggleWatchlist,
+    toggleError,
+    clearToggleError,
+  } = useWatchlist();
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('lunara_movie_watchlist');
-      if (stored) {
-        setWatchlist(JSON.parse(stored));
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-  }, []);
-
-  const toggleWatchlist = (id: string) => {
-    const updated = watchlist.includes(id)
-      ? watchlist.filter((item) => item !== id)
-      : [...watchlist, id];
-    setWatchlist(updated);
-    try {
-      localStorage.setItem('lunara_movie_watchlist', JSON.stringify(updated));
-    } catch {
-      // Ignore
-    }
+  const handleToggle = (id: string) => {
+    clearToggleError();
+    toggleWatchlist(id).catch(() => {
+      // Surfaced via toggleError banner below — never swallowed silently.
+    });
   };
 
   // Determine truthful context based on user's real today logs
@@ -170,6 +163,19 @@ export default function MoviesPage() {
           Low-tension, calming watches curated for days when your body needs quiet rest.
         </p>
       </div>
+
+      {watchlistError && (
+        <DataErrorBanner
+          message="Couldn't load your saved movies."
+          onRetry={() => refetchWatchlist()}
+        />
+      )}
+
+      {toggleError && (
+        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+          <span>Could not update your saved movies. Check your connection and try again.</span>
+        </div>
+      )}
 
       {/* Truthful Context-Aware Recommendation Notice */}
       {(isLowEnergy || isEmotional) && (
@@ -243,7 +249,7 @@ export default function MoviesPage() {
                     </div>
 
                     <button
-                      onClick={() => toggleWatchlist(movie.id)}
+                      onClick={() => handleToggle(movie.id)}
                       className={`p-2 rounded-xl border transition-all cursor-pointer ${
                         isSaved
                           ? 'bg-primary/10 text-primary border-primary/30'
