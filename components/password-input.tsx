@@ -59,8 +59,9 @@ export function PasswordInput({ label, error, id, className = '', ...props }: Pa
 
 const MIN_PASSWORD_LENGTH = 8;
 
-// Small bundled blocklist of the most abused passwords. Checked as
-// case-insensitive substring so `P@ssw0rd123`-style variants still fail.
+// Small bundled blocklist of the most abused passwords. Matched exactly
+// (after stripping trivial affixes) — never as a substring — so a strong
+// password like `MyDragonFly99!` passes while `dragon123` still fails.
 const COMMON_PASSWORDS = [
   'password', 'passw0rd', 'p@ssword', 'p@ssw0rd', '123456', '12345678',
   '123456789', 'qwerty', 'qwerty123', 'abc123', 'letmein', 'welcome',
@@ -68,6 +69,26 @@ const COMMON_PASSWORDS = [
   'football', 'charlie', 'aa123456', 'password1', 'password123', 'changeme',
   'test123', 'toshiba', 'liverpool', 'q1w2e3r4',
 ];
+
+/** Strip leading/trailing digits and punctuation, then lowercase. */
+function blocklistKey(value: string): string {
+  return value.toLowerCase().replace(/^[\d\W]+|[\d\W]+$/g, '');
+}
+
+function isBlockedPassword(value: string): boolean {
+  const key = blocklistKey(value);
+  if (!key) return false;
+  if (COMMON_PASSWORDS.includes(key)) return true;
+  // Leet-speak close variants: normalize common substitutions, then match.
+  const deLeeted = key
+    .replaceAll('@', 'a')
+    .replaceAll('0', 'o')
+    .replaceAll('1', 'l')
+    .replaceAll('3', 'e')
+    .replaceAll('$', 's')
+    .replaceAll('!', 'i');
+  return COMMON_PASSWORDS.includes(deLeeted);
+}
 
 export interface ValidatePasswordOptions {
   email?: string | null;
@@ -90,10 +111,10 @@ export function validatePassword(value: string, opts: ValidatePasswordOptions = 
   if (!/[^A-Za-z0-9]/.test(value)) {
     return 'Password must contain at least one special character (e.g. !@#$%).';
   }
-  const lower = value.toLowerCase();
-  if (COMMON_PASSWORDS.some((c) => lower.includes(c))) {
+  if (isBlockedPassword(value)) {
     return 'That password is too common. Choose something more unique.';
   }
+  const lower = value.toLowerCase();
   // Reject passwords built from the user's own email/name.
   const personal: string[] = [];
   if (opts.email) {
@@ -123,7 +144,6 @@ export function passwordStrength(value: string): { score: number; label: Strengt
   if (/[0-9]/.test(value)) score += 1;
   if (/[^A-Za-z0-9]/.test(value)) score += 1;
   score = Math.min(score, 4);
-  const lower = value.toLowerCase();
-  if (COMMON_PASSWORDS.some((c) => lower.includes(c))) score = Math.min(score, 1);
+  if (isBlockedPassword(value)) score = Math.min(score, 1);
   return { score, label: labels[score] };
 }

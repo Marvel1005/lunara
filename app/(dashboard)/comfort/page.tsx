@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Sparkles, Bed, Sofa, Laptop, Car, Moon, Wind } from 'lucide-react';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 
 type SituationKey = 'bed' | 'sofa' | 'desk' | 'travel' | 'sleep';
 
@@ -240,12 +241,7 @@ export default function ComfortPage() {
         )}
       </div>
 
-      {/* Non-medical Guidance Notice */}
-      <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 text-[11px] text-muted-fg leading-relaxed">
-        <p>
-          These comfort positions are gentle relaxation suggestions based on ergonomic body support. They are not medical treatments. If a position causes any sharp or sudden discomfort, immediately return to your natural posture.
-        </p>
-      </div>
+      <MedicalDisclaimer variant="movement" />
     </div>
   );
 }

@@ -4,16 +4,28 @@ import React from 'react';
 import { ShieldAlert } from 'lucide-react';
 
 interface MedicalDisclaimerProps {
-  variant?: 'short' | 'full' | 'severe';
+  variant?: 'short' | 'full' | 'severe' | 'movement';
 }
 
 /**
- * Single source of truth for the medical disclaimer. Three registers:
+ * Single source of truth for the medical disclaimer. Four registers:
  * - short: one line under tracking features (pain page, partner tips)
  * - full: the complete guidance block (relief page)
  * - severe: urgent wording shown only for high-severity pain
+ * - movement: positioning-safety wording (comfort positions page)
  */
 export function MedicalDisclaimer({ variant = 'short' }: MedicalDisclaimerProps) {
+  if (variant === 'movement') {
+    return (
+      <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 text-[11px] text-muted-fg leading-relaxed">
+        <p>
+          These comfort positions are gentle relaxation suggestions based on ergonomic body
+          support. They are not medical treatments. If a position causes any sharp or sudden
+          discomfort, immediately return to your natural posture.
+        </p>
+      </div>
+    );
+  }
   if (variant === 'severe') {
     return (
       <div className="p-3 rounded-2xl bg-warning/10 border border-warning/50 text-warning-fg text-xs flex items-center gap-2">

@@ -94,9 +94,17 @@ export async function updateSession(request: NextRequest) {
   // 3. Mandatory password setup: authenticated users without a password
   // cannot reach any app page until they visit /set-password. The setup
   // route itself (and auth API routes) are always allowed through.
+  //
+  // Perf: once confirmed, the fact is cached in a short-lived cookie
+  // scoped to the user id (so account switching stays safe) — subsequent
+  // requests skip the profiles query entirely.
   const isSetPasswordPage = pathname === '/set-password';
   const isAuthApiRoute = pathname.startsWith('/auth/');
   if (user && !isSetPasswordPage && !isAuthApiRoute) {
+    const cached = request.cookies.get('lunara_pw_set')?.value;
+    if (cached === user.id) {
+      return supabaseResponse;
+    }
     // PostgrestBuilder is thenable but not a native Promise in this
     // supabase-js version — adopt it so withTimeout can race it.
     const profilePromise = Promise.resolve(
@@ -113,6 +121,13 @@ export async function updateSession(request: NextRequest) {
       });
       return redirectResponse;
     }
+    supabaseResponse.cookies.set('lunara_pw_set', user.id, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+    });
   }
 
   return supabaseResponse;
