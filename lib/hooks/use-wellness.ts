@@ -33,11 +33,16 @@ export function useTodayWellness() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
+      // Latest-row pattern: multiple rows can exist for one date (no DB
+      // uniqueness guard), so order + limit(1) instead of bare maybeSingle,
+      // which errors when >1 row matches and pins the UI at 0 forever.
       const { data, error } = await supabase
         .from('wellness_logs')
         .select('*')
         .eq('user_id', user.id)
         .eq('date', todayStr)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
