@@ -141,7 +141,7 @@ export default function ReliefPage() {
         {/* 2. REST */}
         {(activeCategory === 'all' || activeCategory === 'rest') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-severity-deep/15 text-severity-deep flex items-center justify-center font-bold">
               <BedDouble className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Restful Recovery</h3>
@@ -150,11 +150,11 @@ export default function ReliefPage() {
             </p>
             <ul className="text-xs text-muted-fg space-y-1.5 pt-1">
               <li className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-severity-deep shrink-0" />
                 <span>Dim room lighting to rest your eyes</span>
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-severity-deep shrink-0" />
                 <span>Take 10 minutes of silent deep breathing</span>
               </li>
             </ul>
@@ -212,7 +212,7 @@ export default function ReliefPage() {
         {/* 6. HEAD DISCOMFORT */}
         {(activeCategory === 'all' || activeCategory === 'head') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-teal-500/10 text-teal-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-severity-calm/15 text-severity-calm flex items-center justify-center font-bold">
               <HeartPulse className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Head & Neck Comfort</h3>

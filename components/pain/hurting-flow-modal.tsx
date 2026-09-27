@@ -215,11 +215,11 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-200 flex items-start gap-3">
-                  <BedDouble className="w-5 h-5 text-purple-600 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-severity-deep/15 border border-severity-deep/40 flex items-start gap-3">
+                  <BedDouble className="w-5 h-5 text-severity-deep shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-purple-900">Rest & Supported Position</h4>
-                    <p className="text-[11px] text-purple-800 mt-0.5 leading-relaxed">
+                    <h4 className="text-xs font-bold text-severity-deep-fg">Rest & Supported Position</h4>
+                    <p className="text-[11px] text-severity-deep-fg mt-0.5 leading-relaxed">
                       Resting on your side in a curled fetal position with a pillow between your knees may reduce pelvic pressure.
                     </p>
                   </div>

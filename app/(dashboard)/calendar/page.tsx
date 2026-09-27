@@ -202,7 +202,7 @@ export default function CalendarPage() {
             <span>Estimated Ovulation</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-md bg-purple-100 border border-purple-200 inline-block" />
+            <span className="w-3.5 h-3.5 rounded-md bg-severity-deep/15 border border-severity-deep/40 inline-block" />
             <span>Fertile Window</span>
           </div>
         </div>
@@ -234,7 +234,7 @@ export default function CalendarPage() {
               } else if (status.isOvulation) {
                 cellStyle = 'bg-warning/20 border border-warning/50 text-warning-fg font-bold shadow-soft';
               } else if (status.isFertile) {
-                cellStyle = 'bg-purple-100/70 border border-purple-200 text-purple-900 font-medium';
+                cellStyle = 'bg-severity-deep/15 border border-severity-deep/40 text-severity-deep-fg font-medium';
               }
 
               return (
@@ -279,7 +279,7 @@ export default function CalendarPage() {
                       <span className="text-[8px] font-bold text-warning-fg block leading-none">Ovulation</span>
                     )}
                     {status.isFertile && !status.isOvulation && (
-                      <span className="text-[8px] font-medium text-purple-700 block leading-none">Fertile</span>
+                      <span className="text-[8px] font-medium text-severity-deep-fg block leading-none">Fertile</span>
                     )}
                   </div>
                 </button>
