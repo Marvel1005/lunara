@@ -91,5 +91,25 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse;
   }
 
+  // 3. Mandatory password setup: authenticated users without a password
+  // cannot reach any app page until they visit /set-password. The setup
+  // route itself (and auth API routes) are always allowed through.
+  const isSetPasswordPage = pathname === '/set-password';
+  const isAuthApiRoute = pathname.startsWith('/auth/');
+  if (user && !isSetPasswordPage && !isAuthApiRoute) {
+    const profileResult = await withTimeout(
+      supabase.from('profiles').select('password_set').eq('id', user.id).maybeSingle(),
+      5000
+    );
+    const hasPassword = (profileResult?.data as { password_set?: boolean } | null)?.password_set === true;
+    if (!hasPassword) {
+      const redirectResponse = NextResponse.redirect(new URL('/set-password', request.url));
+      supabaseResponse.cookies.getAll().forEach((c) => {
+        redirectResponse.cookies.set(c.name, c.value);
+      });
+      return redirectResponse;
+    }
+  }
+
   return supabaseResponse;
 }

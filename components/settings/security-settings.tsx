@@ -13,7 +13,7 @@ import { PasswordInput, validatePassword } from '@/components/password-input';
  * show "Set" once and "Change" afterwards. Magic-link login keeps working.
  */
 export function SecuritySettings() {
-  const { profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const hasPassword = profile?.password_set === true;
 
   const [password, setPassword] = useState('');
@@ -27,7 +27,10 @@ export function SecuritySettings() {
     setError(null);
     setSuccess(false);
 
-    const passwordError = validatePassword(password);
+    const passwordError = validatePassword(password, {
+      email: user?.email ?? null,
+      name: profile?.name ?? null,
+    });
     if (passwordError) {
       setError(passwordError);
       return;
@@ -98,7 +101,7 @@ export function SecuritySettings() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Upper, lower, number — at least 8 chars"
+          placeholder="Upper, lower, number, symbol — 8+ chars"
         />
 
         <PasswordInput
