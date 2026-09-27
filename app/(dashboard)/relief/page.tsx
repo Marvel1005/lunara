@@ -9,10 +9,10 @@ import {
   Activity,
   Maximize2,
   Sparkles,
-  ShieldAlert,
   HeartPulse,
   ChevronRight,
 } from 'lucide-react';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 import { HurtingFlowModal } from '@/components/pain/hurting-flow-modal';
 import { PainHistoryModal } from '@/components/pain/pain-history-modal';
 import { ThemeCornerDecor, ThemeBadge } from '@/components/theme/theme-decorations';
@@ -229,16 +229,7 @@ export default function ReliefPage() {
         )}
       </div>
 
-      {/* Safety & Medical Disclaimer Section */}
-      <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-300 space-y-3">
-        <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
-          <ShieldAlert className="w-5 h-5 text-amber-700 shrink-0" />
-          <span>Care & Safety Guidance</span>
-        </div>
-        <p className="text-xs text-amber-900/90 leading-relaxed">
-          Lunara provides general comfort strategies for everyday cycle wellbeing and does not provide medical diagnoses or prescriptions. If your pain is unusually severe, sudden, worsening, persistent, or accompanied by symptoms such as fever or dizziness, please seek evaluation from a qualified healthcare professional.
-        </p>
-      </div>
+      <MedicalDisclaimer variant="full" />
     </div>
   );
 }

@@ -6,7 +6,8 @@ import { PainMeter } from '@/components/pain/pain-meter';
 import { PainLocationSelector } from '@/components/pain/pain-location-selector';
 import { PainTypeSelector } from '@/components/pain/pain-type-selector';
 import { PainLocationKey, PainTypeKey, formatBodyAreas, formatPainTypes, getSeverityDescriptor } from '@/lib/types/pain';
-import { HeartPulse, CheckCircle2, ShieldAlert, Sparkles } from 'lucide-react';
+import { HeartPulse, CheckCircle2, Sparkles } from 'lucide-react';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 import { format } from 'date-fns';
 
 export default function PainPage() {
@@ -127,16 +128,7 @@ export default function PainPage() {
         </div>
       </form>
 
-      {/* Safety Notice */}
-      <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-300/80 space-y-1.5">
-        <div className="flex items-center gap-2 text-amber-900 font-bold text-xs">
-          <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
-          <span>Care & Safety Guidance</span>
-        </div>
-        <p className="text-[11px] text-amber-900/90 leading-relaxed">
-          Lunara pain check-ins are for personal comfort tracking. If your pain is unusually severe, sudden, or persistent, please consult a healthcare professional.
-        </p>
-      </div>
+      <MedicalDisclaimer variant="short" />
     </div>
   );
 }

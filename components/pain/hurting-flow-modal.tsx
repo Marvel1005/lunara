@@ -13,8 +13,8 @@ import {
   Flame,
   Coffee,
   BedDouble,
-  ShieldAlert,
 } from 'lucide-react';
+import { MedicalDisclaimer } from '@/components/medical-disclaimer';
 import { format } from 'date-fns';
 import {
   PainLocationKey,
@@ -227,14 +227,7 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
               </div>
 
               {/* Safety notice for severe pain */}
-              {severity >= 7 && (
-                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-300 text-amber-900 text-xs flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0" />
-                  <span>
-                    Your pain is marked as severe. If pain is sudden, persistent, or worsening, please consult a medical professional.
-                  </span>
-                </div>
-              )}
+              {severity >= 7 && <MedicalDisclaimer variant="severe" />}
             </div>
           )}
         </div>
