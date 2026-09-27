@@ -39,7 +39,7 @@ export function MobileNav() {
   const items = partnerMode ? partnerMobileNavItems : mobileNavItems;
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-border px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-header border-t border-border px-2 pt-1 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
       <nav className="flex items-center justify-around max-w-md mx-auto">
         {items.map((item) => {
           const Icon = item.icon;

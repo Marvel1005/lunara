@@ -118,7 +118,7 @@ export default function InsightsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div className="p-4 rounded-2xl bg-muted/30 border border-border/80 space-y-1">
                 <span className="text-xs font-semibold text-muted-fg">Average Cycle Length</span>
                 <p className="text-2xl font-bold text-primary">~{settings?.average_cycle_length || 28} days</p>

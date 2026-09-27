@@ -57,14 +57,14 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r border-border glass-panel p-5 justify-between select-none">
+    <aside className="hidden md:flex flex-col md:w-[76px] lg:w-64 h-screen sticky top-0 border-r border-border glass-panel md:p-3 lg:p-5 justify-between select-none">
       <div className="space-y-5">
         {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center shadow-comfort text-lg">
+        <div className="flex items-center gap-3 px-2 md:justify-center lg:justify-start">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center shadow-comfort text-lg shrink-0">
             🌙
           </div>
-          <div>
+          <div className="hidden lg:block">
             <h1 className="text-xl font-bold tracking-tight text-foreground">Lunara</h1>
             <p className="text-xs text-muted-fg font-medium">Your cycle. Your comfort.</p>
           </div>
@@ -74,10 +74,11 @@ export function Sidebar() {
         {!partnerMode && (
           <Link
             href="/pain"
+            title="I'm hurting right now"
             className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:shadow-comfort hover:scale-[1.01] transition-all cursor-pointer border border-white/20"
           >
-            <HeartPulse className="w-4 h-4 text-white" />
-            <span>I&apos;m hurting right now</span>
+            <HeartPulse className="w-4 h-4 text-white shrink-0" />
+            <span className="hidden lg:inline">I&apos;m hurting right now</span>
           </Link>
         )}
 
@@ -91,14 +92,15 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
+                title={item.name}
+                className={`flex items-center md:justify-center lg:justify-start gap-3 md:px-0 lg:px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
                   isActive
                     ? 'bg-primary text-primary-fg shadow-comfort font-semibold'
                     : 'text-muted-fg hover:text-foreground hover:bg-muted/70'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-muted-fg'}`} />
-                <span>{item.name}</span>
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-muted-fg'}`} />
+                <span className="hidden lg:inline">{item.name}</span>
               </Link>
             );
           })}
@@ -106,17 +108,18 @@ export function Sidebar() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 transition-all w-full text-left cursor-pointer mt-1"
+            title="Sign Out"
+            className="flex items-center md:justify-center lg:justify-start gap-3 md:px-0 lg:px-3.5 py-2.5 rounded-2xl text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 transition-all w-full text-left cursor-pointer mt-1"
           >
-            <LogOut className="w-4 h-4 text-rose-500" />
-            <span>Sign Out</span>
+            <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
+            <span className="hidden lg:inline">Sign Out</span>
           </button>
         </nav>
       </div>
 
-      {/* Footer / Cycle Status summary pill — hidden in partner mode */}
+      {/* Footer / Cycle Status summary pill — hidden in partner mode + icon rail */}
       {!partnerMode && cycleSummary.hasCycleData && (
-        <div className="p-3.5 rounded-2xl bg-primary-soft/50 border border-border text-center">
+        <div className="hidden lg:block p-3.5 rounded-2xl bg-primary-soft/50 border border-border text-center">
           <p className="text-xs font-semibold text-primary">
             {cycleSummary.isPeriod
               ? `Period Phase • Day ${cycleSummary.periodDay || 1}`

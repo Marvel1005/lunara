@@ -235,7 +235,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Energy & Hydration Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pt-1">
           {/* Energy Selector */}
           <div className="p-4 rounded-3xl border border-border bg-card/40 space-y-3">
             <div className="flex items-center justify-between">
