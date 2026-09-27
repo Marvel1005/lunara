@@ -97,11 +97,15 @@ export async function updateSession(request: NextRequest) {
   const isSetPasswordPage = pathname === '/set-password';
   const isAuthApiRoute = pathname.startsWith('/auth/');
   if (user && !isSetPasswordPage && !isAuthApiRoute) {
-    const profileResult = await withTimeout(
-      supabase.from('profiles').select('password_set').eq('id', user.id).maybeSingle(),
-      5000
+    // PostgrestBuilder is thenable but not a native Promise in this
+    // supabase-js version — adopt it so withTimeout can race it.
+    const profilePromise = Promise.resolve(
+      supabase.from('profiles').select('password_set').eq('id', user.id).maybeSingle()
     );
-    const hasPassword = (profileResult?.data as { password_set?: boolean } | null)?.password_set === true;
+    const profileResult = (await withTimeout(profilePromise, 5000)) as {
+      data: { password_set?: boolean } | null;
+    } | null;
+    const hasPassword = profileResult?.data?.password_set === true;
     if (!hasPassword) {
       const redirectResponse = NextResponse.redirect(new URL('/set-password', request.url));
       supabaseResponse.cookies.getAll().forEach((c) => {
