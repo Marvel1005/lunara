@@ -62,7 +62,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-outfit)", "Inter", "sans-serif"],
-        display: ["var(--font-outfit)", "serif"],
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       keyframes: {
         pulseGlow: {
