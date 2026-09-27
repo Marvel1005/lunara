@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTheme } from '@/providers/theme-provider';
+import { usePartnerMode } from '@/lib/hooks/use-partner-mode';
 import { getThemeConfig } from '@/lib/theme/theme-config';
 import { ThemeStyle } from '@/lib/cycle/types';
 import { Check, Heart } from 'lucide-react';
@@ -15,6 +16,9 @@ const activeThemeKeys: ThemeStyle[] = [
   'midnight-comfort',
 ];
 
+// Partner end stays light: just a light and a dark option.
+const partnerThemeKeys: ThemeStyle[] = ['warm-minimal', 'midnight-comfort'];
+
 export function ThemeSelector() {
   const {
     themeStyle,
@@ -22,6 +26,15 @@ export function ThemeSelector() {
     autoComfortMode,
     setAutoComfortMode,
   } = useTheme();
+  const { partnerMode } = usePartnerMode();
+  const visibleKeys = partnerMode ? partnerThemeKeys : activeThemeKeys;
+
+  // Coerce any previously saved fancy theme down to light on the partner end.
+  useEffect(() => {
+    if (partnerMode && !partnerThemeKeys.includes(themeStyle)) {
+      setThemeStyle('warm-minimal');
+    }
+  }, [partnerMode, themeStyle, setThemeStyle]);
 
   return (
     <div className="space-y-4">
@@ -62,7 +75,7 @@ export function ThemeSelector() {
           Visual Atmosphere
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {activeThemeKeys.map((key) => {
+          {visibleKeys.map((key) => {
             const config = getThemeConfig(key);
             const isSelected = themeStyle === key;
 
