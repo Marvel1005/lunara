@@ -24,6 +24,8 @@ export default function JournalPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Edit state
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
@@ -39,32 +41,35 @@ export default function JournalPage() {
     { label: 'Uncomfortable', emoji: '😣' },
   ];
 
-  useEffect(() => {
-    async function loadJournalEntries() {
-      try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          setIsLoading(false);
-          return;
-        }
-
-        const { data, error } = await supabase
-          .from('journal_entries')
-          .select('id, date, content, mood, tags, created_at')
-          .eq('user_id', user.id)
-          .order('date', { ascending: false });
-
-        if (error) throw error;
-        if (data) {
-          setEntries(data as JournalEntry[]);
-        }
-      } catch (err) {
-        console.error('Failed to fetch journal entries from Supabase:', err);
-      } finally {
-        setIsLoading(false);
+  async function loadJournalEntries() {
+    setIsLoading(true);
+    setLoadError(false);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return;
       }
+
+      const { data, error } = await supabase
+        .from('journal_entries')
+        .select('id, date, content, mood, tags, created_at')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      if (data) {
+        setEntries(data as JournalEntry[]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch journal entries from Supabase:', err);
+      setLoadError(true);
+    } finally {
+      setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadJournalEntries();
   }, []);
 
@@ -86,6 +91,7 @@ export default function JournalPage() {
     if (!newContent.trim()) return;
 
     setIsSaving(true);
+    setSaveError(null);
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -115,6 +121,7 @@ export default function JournalPage() {
       }
     } catch (err) {
       console.error('Failed to save journal entry to Supabase:', err);
+      setSaveError('Could not save your entry. Check your connection and try again.');
     } finally {
       setIsSaving(false);
     }
@@ -189,6 +196,12 @@ export default function JournalPage() {
           <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Reflection saved privately to your Supabase sanctuary.</span>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+            <span>{saveError}</span>
           </div>
         )}
 
@@ -292,6 +305,20 @@ export default function JournalPage() {
           <div className="space-y-3 animate-pulse">
             <div className="h-28 rounded-3xl bg-muted/40" />
             <div className="h-28 rounded-3xl bg-muted/30" />
+          </div>
+        ) : loadError ? (
+          <div className="p-6 rounded-3xl border border-rose-500/20 bg-rose-500/5 text-center space-y-3" role="alert">
+            <p className="text-sm font-semibold text-foreground">Couldn&apos;t load your entries</p>
+            <p className="text-xs text-muted-fg leading-relaxed">
+              Check your connection and try again. Your saved entries are safe.
+            </p>
+            <button
+              type="button"
+              onClick={loadJournalEntries}
+              className="px-4 py-2 rounded-xl bg-primary text-primary-fg text-xs font-semibold hover:opacity-90 transition-all cursor-pointer min-h-[44px]"
+            >
+              Retry
+            </button>
           </div>
         ) : entries.length === 0 ? (
           <ThemeEmptyStateDecor

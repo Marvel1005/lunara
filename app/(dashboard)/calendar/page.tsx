@@ -27,14 +27,16 @@ import {
 } from 'lucide-react';
 import { usePeriods } from '@/lib/hooks/use-periods';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
+import { DataErrorBanner } from '@/components/data-error-banner';
 import { calculateCycleSummary } from '@/lib/cycle/engine';
 import { PeriodModal } from '@/components/cycle/period-modal';
 import { ThemeCornerDecor, ThemeBadge } from '@/components/theme/theme-decorations';
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const { periods, isLoading: isLoadingPeriods } = usePeriods();
-  const { settings, isLoading: isLoadingSettings } = useCycleSettings();
+  const { periods, isError: periodsError, refetchPeriods } = usePeriods();
+  const { settings, isError: settingsError, refetchSettings } = useCycleSettings();
+  const loadFailed = periodsError || settingsError;
 
   // Log/Edit modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -127,6 +129,12 @@ export default function CalendarPage() {
             Visualizing recorded period history and mathematical predictions.
           </p>
         </div>
+        {loadFailed && (
+          <DataErrorBanner
+            message="Couldn't load your cycle data. Predictions below may be incomplete."
+            onRetry={() => { refetchPeriods(); refetchSettings(); }}
+          />
+        )}
 
         <button
           onClick={() => {

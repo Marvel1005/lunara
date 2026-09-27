@@ -20,8 +20,7 @@ export function usePainLogs() {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching pain logs from Supabase:', error);
-        return [];
+        throw error;
       }
 
       return (data || []) as PainLog[];

@@ -15,11 +15,13 @@ export default function PainPage() {
   const [types, setTypes] = useState<PainTypeKey[]>(['cramping']);
   const [notes, setNotes] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const { addPainLog, isAdding } = usePainLogs();
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaveError(null);
     try {
       await addPainLog({
         date: format(new Date(), 'yyyy-MM-dd'),
@@ -32,6 +34,7 @@ export default function PainPage() {
       setTimeout(() => setSaveSuccess(false), 4000);
     } catch (err) {
       console.error('Failed to log pain entry:', err);
+      setSaveError('Could not save your check-in. Check your connection and try again.');
     }
   };
 
@@ -57,6 +60,12 @@ export default function PainPage() {
             <span className="font-bold block text-emerald-950">Pain log saved</span>
             <span>Your check-in has been stored securely in your private health log.</span>
           </div>
+        </div>
+      )}
+
+      {saveError && (
+        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+          <span>{saveError}</span>
         </div>
       )}
 

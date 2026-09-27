@@ -24,7 +24,7 @@ export function useCycleSettings() {
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching cycle settings:', error);
+        throw error;
       }
 
       return data || {
@@ -69,6 +69,7 @@ export function useCycleSettings() {
     settings: query.data || { average_cycle_length: 28, average_period_length: 5, auto_theme: true },
     isLoading: query.isLoading,
     isError: query.isError,
+    refetchSettings: query.refetch,
     updateSettings: updateMutation.mutateAsync,
     isUpdating: updateMutation.isPending,
   };

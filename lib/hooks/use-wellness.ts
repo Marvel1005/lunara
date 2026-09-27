@@ -45,8 +45,8 @@ export function useTodayWellness() {
         .limit(1)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Failed to fetch today wellness log:', error);
+      if (error) {
+        throw error;
       }
 
       return data as WellnessRecord | null;
@@ -150,8 +150,8 @@ export function useTodayMood() {
         .limit(1)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Failed to fetch today mood log:', error);
+      if (error) {
+        throw error;
       }
 
       return data as MoodRecord | null;

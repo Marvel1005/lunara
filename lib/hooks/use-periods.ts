@@ -20,8 +20,7 @@ export function usePeriods() {
         .order('start_date', { ascending: false });
 
       if (error) {
-        console.error('Error fetching periods from Supabase:', error);
-        return [];
+        throw error;
       }
 
       return (data || []) as Period[];

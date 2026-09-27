@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { usePeriods } from '@/lib/hooks/use-periods';
 import { usePainLogs } from '@/lib/hooks/use-pain';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
+import { DataErrorBanner } from '@/components/data-error-banner';
 import { calculateCycleSummary } from '@/lib/cycle/engine';
 import { ThemeCornerDecor, ThemeEmptyStateDecor, ThemeBadge } from '@/components/theme/theme-decorations';
 import {
@@ -21,9 +22,10 @@ import {
 import { format, parseISO } from 'date-fns';
 
 export default function InsightsPage() {
-  const { periods, isLoading: isLoadingPeriods } = usePeriods();
-  const { painLogs, isLoading: isLoadingPain } = usePainLogs();
+  const { periods, isLoading: isLoadingPeriods, isError: periodsError, refetchPeriods } = usePeriods();
+  const { painLogs, isLoading: isLoadingPain, isError: painError, refetchPainLogs } = usePainLogs();
   const { settings } = useCycleSettings();
+  const loadFailed = periodsError || painError;
   const summary = calculateCycleSummary(periods, settings);
 
   const [timeRange, setTimeRange] = useState<'3m' | '6m' | '1yr'>('6m');
@@ -79,6 +81,13 @@ export default function InsightsPage() {
           </div>
         )}
       </div>
+
+      {loadFailed && (
+        <DataErrorBanner
+          message="Couldn't load your history. Insights below may be incomplete."
+          onRetry={() => { refetchPeriods(); refetchPainLogs(); }}
+        />
+      )}
 
       {!hasData ? (
         /* Emotionally Appropriate Warm Empty State */
