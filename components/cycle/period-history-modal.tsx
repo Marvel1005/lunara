@@ -6,6 +6,7 @@ import { Calendar as CalendarIcon, Edit3, Trash2, Plus, X, Droplets } from 'luci
 import { Period } from '@/lib/cycle/types';
 import { usePeriods } from '@/lib/hooks/use-periods';
 import { PeriodModal } from './period-modal';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface PeriodHistoryModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
   const { periods, deletePeriod } = usePeriods();
   const [selectedPeriod, setSelectedPeriod] = useState<Period | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -35,7 +37,13 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this period record?')) return;
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
     try {
       await deletePeriod(id);
     } catch (err) {
@@ -136,6 +144,14 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         periodToEdit={selectedPeriod}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Delete period record?"
+        message="This entry will be permanently removed from your history."
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
       />
     </>
   );

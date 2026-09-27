@@ -27,6 +27,7 @@ import {
 import { usePainLogs } from '@/lib/hooks/use-pain';
 import { usePeriods } from '@/lib/hooks/use-periods';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { calculateCycleSummary } from '@/lib/cycle/engine';
 import { PainMeter } from './pain-meter';
 import { PainLocationSelector } from './pain-location-selector';
@@ -48,6 +49,7 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
   const [editTypes, setEditTypes] = useState<PainTypeKey[]>([]);
   const [editNotes, setEditNotes] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -81,13 +83,18 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this pain log entry?')) {
-      try {
-        await deletePainLog(id);
-      } catch (err: unknown) {
-        if (err instanceof Error) setErrorMessage(err.message);
-        else setErrorMessage('Failed to delete pain log from Supabase.');
-      }
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
+    const id = pendingDeleteId;
+    setPendingDeleteId(null);
+    try {
+      await deletePainLog(id);
+    } catch (err: unknown) {
+      if (err instanceof Error) setErrorMessage(err.message);
+      else setErrorMessage('Failed to delete pain log from Supabase.');
     }
   };
 
@@ -289,6 +296,14 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
           </div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        title="Delete pain entry?"
+        message="This check-in will be permanently removed from your log."
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }

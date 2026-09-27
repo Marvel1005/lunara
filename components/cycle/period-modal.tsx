@@ -5,6 +5,7 @@ import { format, parseISO, isValid } from 'date-fns';
 import { Calendar as CalendarIcon, Droplets, Trash2, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { Period, FlowType } from '@/lib/cycle/types';
 import { usePeriods } from '@/lib/hooks/use-periods';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface PeriodModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export function PeriodModal({
   const [notes, setNotes] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (periodToEdit) {
@@ -100,8 +102,12 @@ export function PeriodModal({
 
   const handleDelete = async () => {
     if (!periodToEdit) return;
-    if (!confirm('Are you sure you want to delete this period entry?')) return;
+    setShowDeleteConfirm(true);
+  };
 
+  const confirmDelete = async () => {
+    if (!periodToEdit) return;
+    setShowDeleteConfirm(false);
     setLoading(true);
     try {
       await deletePeriod(periodToEdit.id);
@@ -247,6 +253,14 @@ export function PeriodModal({
           </div>
         </form>
       </div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="Delete period entry?"
+        message="This entry will be permanently removed from your history."
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </div>
   );
 }
