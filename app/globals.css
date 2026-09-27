@@ -336,6 +336,13 @@ body {
   transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
 }
 
+/* Flat treatment for tertiary content (metadata, footnotes, tip lists):
+   no border, no shadow — stays visually below primary cards. */
+.card-flat {
+  background: var(--muted);
+  border-radius: 1rem;
+}
+
 .tactile-button {
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, opacity 0.2s ease;
 }

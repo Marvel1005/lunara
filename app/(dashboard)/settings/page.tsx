@@ -319,7 +319,7 @@ export default function SettingsPage() {
       <div className="glass-panel p-5 rounded-2xl shadow-soft border border-border space-y-3">
         <div className="flex items-center gap-2 border-b border-border/60 pb-3">
           <Palette className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-bold text-foreground">Sanctuary Atmosphere</h2>
+          <h2 className="text-sm font-bold text-foreground">Appearance</h2>
         </div>
         <ThemeSelector />
       </div>

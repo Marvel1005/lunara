@@ -200,7 +200,7 @@ export default function JournalPage() {
         {saveSuccess && (
           <div className="p-3 rounded-2xl bg-success/10 border border-success/20 text-success-fg text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>Reflection saved privately to your Supabase sanctuary.</span>
+            <span>Reflection saved privately.</span>
           </div>
         )}
 
@@ -259,7 +259,7 @@ export default function JournalPage() {
                     onClick={() => handleRemoveTag(tag)}
                     className="hover:opacity-75 cursor-pointer ml-0.5"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
               ))}
@@ -333,8 +333,9 @@ export default function JournalPage() {
           </div>
         ) : entries.length === 0 ? (
           <ThemeEmptyStateDecor
-            title="Your story is just getting started"
-            description="Your thoughts are completely private and encrypted in Supabase. Write your first reflection whenever you feel ready."
+            emoji="✒️"
+            title="A blank page, waiting"
+            description="Nothing written yet. When something's on your mind — a symptom, a feeling, a small win — put it here. Only you can read it."
           />
         ) : (
           <div className="grid grid-cols-1 gap-4">

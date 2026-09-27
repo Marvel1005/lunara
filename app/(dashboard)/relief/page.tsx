@@ -101,7 +101,7 @@ export default function ReliefPage() {
         <ThemeCornerDecor size="md" className="top-0 right-0" />
         <div className="space-y-1">
           <ThemeBadge>
-            <Sparkles className="w-3 h-3" /> Comfort Positions & Breathing
+            <Sparkles className="w-3.5 h-3.5" /> Comfort Positions & Breathing
           </ThemeBadge>
           <h3 className="text-base font-bold text-foreground">Looking for supported rest positions?</h3>
           <p className="text-xs text-muted-fg leading-relaxed">

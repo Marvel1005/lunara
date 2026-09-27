@@ -221,7 +221,7 @@ export function ThemeCardDecor({ className = '' }: { className?: string }) {
 /**
  * ThemeEmptyStateDecor: Rich theme-tailored empty state visual illustration component.
  */
-export function ThemeEmptyStateDecor({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) {
+export function ThemeEmptyStateDecor({ title, description, action, emoji }: { title: string; description: string; action?: React.ReactNode; emoji?: string }) {
   const { themeStyle } = useTheme();
 
   const getEmoji = () => {
@@ -246,7 +246,7 @@ export function ThemeEmptyStateDecor({ title, description, action }: { title: st
       <ThemeCornerDecor size="lg" className="absolute -top-4 -right-4" />
 
       <div className="w-16 h-16 rounded-3xl bg-primary-soft/80 text-primary flex items-center justify-center text-3xl shadow-soft border border-primary/20 animate-gentle-pulse">
-        {getEmoji()}
+        {emoji ?? getEmoji()}
       </div>
 
       <div className="space-y-1.5 max-w-md">

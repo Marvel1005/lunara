@@ -92,8 +92,9 @@ export default function InsightsPage() {
       {!hasData ? (
         /* Emotionally Appropriate Warm Empty State */
         <ThemeEmptyStateDecor
-          title="We're still getting to know your rhythm"
-          description="Keep checking in and logging your periods or comfort moments, and we'll gradually uncover your gentle patterns over time."
+          emoji="📈"
+          title="Not enough history yet"
+          description="Insights need at least a couple of logged periods or check-ins to calculate from. Log a period to start building your timeline."
           action={
             <div className="flex items-center gap-2">
               <ThemeBadge>

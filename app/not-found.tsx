@@ -9,7 +9,7 @@ export default function NotFound() {
       </div>
       <h1 className="text-3xl font-bold tracking-tight mb-2">Page not found</h1>
       <p className="text-muted-fg max-w-sm mb-8 text-sm leading-relaxed">
-        The sanctuary page you are looking for might have moved or doesn&apos;t exist yet.
+        The page you are looking for might have moved or doesn&apos;t exist.
       </p>
       <Link
         href="/dashboard"

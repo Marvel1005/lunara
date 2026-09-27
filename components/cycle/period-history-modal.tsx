@@ -65,7 +65,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
               </div>
               <div>
                 <h3 className="text-base font-bold text-foreground">Period History</h3>
-                <p className="text-xs text-muted-fg">Logged periods in your private sanctuary</p>
+                <p className="text-xs text-muted-fg">Your logged period history</p>
               </div>
             </div>
             <button

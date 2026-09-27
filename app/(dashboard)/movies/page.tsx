@@ -284,7 +284,7 @@ export default function MoviesPage() {
                     className="flex items-center gap-1 text-[11px] font-medium text-muted-fg hover:text-foreground transition-colors"
                   >
                     <span>Where to watch</span>
-                    <ExternalLink className="w-3 h-3" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
               </div>

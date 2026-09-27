@@ -264,8 +264,8 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
         </div>
       </div>
 
-      {/* Supportive suggestions */}
-      <div className="p-4 rounded-3xl bg-muted/40 border border-border/60 space-y-3">
+      {/* Supportive suggestions — tertiary content, flat treatment */}
+      <div className="card-flat p-4 space-y-3">
         <p className="text-xs font-bold uppercase tracking-wider text-muted-fg">Ways to support</p>
         <ul className="space-y-2">
           {SUPPORTIVE_TIPS.map((tip, i) => (

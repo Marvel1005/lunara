@@ -258,7 +258,7 @@ export default function CalendarPage() {
                       {format(day, 'd')}
                     </span>
                     {status.isOvulation && (
-                      <Sparkles className="w-3 h-3 text-amber-600" />
+                      <Sparkles className="w-3 h-3 text-warning" />
                     )}
                     {status.isRecordedPeriod && (
                       <Droplets className="w-3 h-3 text-white" />
