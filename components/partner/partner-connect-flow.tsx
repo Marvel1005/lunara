@@ -161,7 +161,7 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
 
       {/* Sheet */}
       <motion.div
-        className="relative z-10 w-full sm:max-w-md bg-card-bg-elevated rounded-t-3xl sm:rounded-3xl shadow-2xl border border-border overflow-hidden max-h-[92vh] flex flex-col"
+        className="relative z-10 w-full sm:max-w-md bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl border border-border overflow-hidden max-h-[92vh] flex flex-col"
         initial={{ y: '100%', opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
@@ -266,7 +266,7 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
                 </button>
 
                 {error && (
-                  <p role="alert" className="text-xs text-red-600 text-center">{error}</p>
+                  <p role="alert" className="text-xs text-danger text-center">{error}</p>
                 )}
               </motion.div>
             )}
@@ -437,9 +437,9 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-4"
               >
-                <div className="p-4 rounded-2xl bg-red-50 border border-red-200 flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                  <p className="text-xs text-red-700 leading-relaxed">{error}</p>
+                <div className="p-4 rounded-2xl bg-danger/10 border border-danger/30 flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
+                  <p className="text-xs text-danger-fg leading-relaxed">{error}</p>
                 </div>
 
                 <div className="flex gap-3">

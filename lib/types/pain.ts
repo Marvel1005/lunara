@@ -127,46 +127,46 @@ export function getSeverityDescriptor(severity: number): {
     return {
       label: 'No Pain',
       description: 'Comfortable and feeling completely pain-free right now.',
-      colorClass: 'text-emerald-700 font-bold',
-      badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+      colorClass: 'text-success-fg font-bold',
+      badgeBg: 'bg-success/15 text-success-fg border-success/40',
     };
   }
   if (severity <= 2) {
     return {
       label: 'Very Mild',
       description: 'Barely noticeable sensation, easily manageable.',
-      colorClass: 'text-teal-700 font-bold',
-      badgeBg: 'bg-teal-100 text-teal-800 border-teal-300',
+      colorClass: 'text-severity-calm-fg font-bold',
+      badgeBg: 'bg-severity-calm/15 text-severity-calm-fg border-severity-calm/40',
     };
   }
   if (severity <= 4) {
     return {
       label: 'Mild',
       description: 'Noticeable discomfort, but allows normal activity.',
-      colorClass: 'text-amber-700 font-bold',
-      badgeBg: 'bg-amber-100 text-amber-900 border-amber-300',
+      colorClass: 'text-warning-fg font-bold',
+      badgeBg: 'bg-warning/15 text-warning-fg border-warning/40',
     };
   }
   if (severity <= 6) {
     return {
       label: 'Moderate',
       description: 'Interferes with focus. Calls for rest and comfort measures.',
-      colorClass: 'text-orange-700 font-bold',
-      badgeBg: 'bg-orange-100 text-orange-900 border-orange-300',
+      colorClass: 'text-severity-warm-fg font-bold',
+      badgeBg: 'bg-severity-warm/15 text-severity-warm-fg border-severity-warm/40',
     };
   }
   if (severity <= 8) {
     return {
       label: 'Severe',
       description: 'Significant pain. Requires gentle care, rest, and pain management.',
-      colorClass: 'text-rose-700 font-bold',
-      badgeBg: 'bg-rose-100 text-rose-900 border-rose-300',
+      colorClass: 'text-danger-fg font-bold',
+      badgeBg: 'bg-danger/15 text-danger-fg border-danger/40',
     };
   }
   return {
     label: 'Very Severe',
     description: 'Intense discomfort. Focus on resting in a safe, quiet sanctuary.',
-    colorClass: 'text-purple-900 font-bold',
-    badgeBg: 'bg-purple-200 text-purple-950 border-purple-400',
+    colorClass: 'text-severity-deep-fg font-bold',
+      badgeBg: 'bg-severity-deep/20 text-severity-deep-fg border-severity-deep/50',
   };
 }

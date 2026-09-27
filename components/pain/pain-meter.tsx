@@ -47,7 +47,7 @@ export function PainMeter({ value, onChange, disabled = false }: PainMeterProps)
         <div className={`p-1 rounded-lg ${value >= 1 && value <= 3 ? 'bg-info/10 text-info-fg font-bold' : ''}`}>Mild (1–3)</div>
         <div className={`p-1 rounded-lg ${value >= 4 && value <= 6 ? 'bg-warning/10 text-warning-fg font-bold' : ''}`}>Moderate (4–6)</div>
         <div className={`p-1 rounded-lg ${value >= 7 && value <= 8 ? 'bg-danger/10 text-danger-fg font-bold' : ''}`}>Strong (7–8)</div>
-        <div className={`p-1 rounded-lg ${value >= 9 ? 'bg-purple-500/10 text-purple-700 font-bold' : ''}`}>Very strong (9–10)</div>
+        <div className={`p-1 rounded-lg ${value >= 9 ? 'bg-severity-deep/15 text-severity-deep-fg font-bold' : ''}`}>Very strong (9–10)</div>
       </div>
 
       {/* Horizontal Slider (Thumb-Friendly Track) */}

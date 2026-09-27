@@ -136,7 +136,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-xl text-muted-fg hover:text-danger hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-xl text-muted-fg hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
                       title="Delete entry"
                     >
                       <Trash2 className="w-4 h-4" />

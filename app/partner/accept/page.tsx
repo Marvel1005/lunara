@@ -240,7 +240,7 @@ function PartnerAcceptContent() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                <CheckCircle className="w-14 h-14 text-green-500 mx-auto" />
+                <CheckCircle className="w-14 h-14 text-success mx-auto" />
               </motion.div>
               <div className="space-y-1">
                 <h1 className="text-lg font-bold text-foreground">You&apos;re connected!</h1>
@@ -255,7 +255,7 @@ function PartnerAcceptContent() {
           {/* Error */}
           {state === 'error' && (
             <>
-              <XCircle className="w-14 h-14 text-red-400 mx-auto" />
+              <XCircle className="w-14 h-14 text-danger mx-auto" />
               <div className="space-y-2">
                 <h1 className="text-lg font-bold text-foreground">Invitation not accepted</h1>
                 <p className="text-sm text-muted-fg leading-relaxed">{errorMessage}</p>

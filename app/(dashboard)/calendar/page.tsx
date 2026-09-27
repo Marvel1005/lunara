@@ -232,7 +232,7 @@ export default function CalendarPage() {
               } else if (status.isPredictedPeriod) {
                 cellStyle = 'bg-primary-soft/30 border-2 border-dashed border-primary/60 text-foreground font-semibold';
               } else if (status.isOvulation) {
-                cellStyle = 'bg-amber-100 border border-warning/50 text-warning-fg font-bold shadow-soft';
+                cellStyle = 'bg-warning/20 border border-warning/50 text-warning-fg font-bold shadow-soft';
               } else if (status.isFertile) {
                 cellStyle = 'bg-purple-100/70 border border-purple-200 text-purple-900 font-medium';
               }

@@ -123,11 +123,12 @@ export function PeriodModal({
     }
   };
 
+  // Graduated intensity on the app's own color language.
   const flowOptions: { type: FlowType; label: string; bg: string }[] = [
-    { type: 'spotting', label: 'Spotting', bg: 'bg-pink-100 border-pink-300 text-pink-800' },
-    { type: 'light', label: 'Light', bg: 'bg-rose-100 border-rose-300 text-danger-fg' },
-    { type: 'medium', label: 'Medium', bg: 'bg-danger/30 border-danger text-danger-fg' },
-    { type: 'heavy', label: 'Heavy', bg: 'bg-red-200 border-red-400 text-red-950' },
+    { type: 'spotting', label: 'Spotting', bg: 'bg-primary-soft border-primary/20 text-primary' },
+    { type: 'light', label: 'Light', bg: 'bg-primary/15 border-primary/30 text-primary' },
+    { type: 'medium', label: 'Medium', bg: 'bg-danger/20 border-danger/40 text-danger-fg' },
+    { type: 'heavy', label: 'Heavy', bg: 'bg-danger text-white border-danger' },
   ];
 
   return (
@@ -220,7 +221,7 @@ export function PeriodModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="p-2 rounded-xl text-danger hover:bg-rose-50 border border-danger/30 transition-colors text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                className="p-2 rounded-xl text-danger hover:bg-danger/10 border border-danger/30 transition-colors text-xs font-semibold flex items-center gap-1 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>

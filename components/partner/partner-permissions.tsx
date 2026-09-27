@@ -208,7 +208,7 @@ export function PartnerPermissionsEditor({ connectionId, current }: PartnerPermi
       </div>
 
       {error && (
-        <div role="alert" className="px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-sm text-red-700">
+        <div role="alert" className="px-4 py-3 rounded-2xl bg-danger/10 border border-danger/30 text-sm text-danger-fg">
           {error}
         </div>
       )}

@@ -15,10 +15,10 @@ export const ThemeBackground = React.memo(function ThemeBackground() {
       {/* Soft Floral Atmosphere */}
       {themeStyle === 'soft-floral' && (
         <>
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-bl from-danger/30/30 via-emerald-100/20 to-transparent blur-3xl" />
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-bl from-danger/30 via-success/20 to-transparent blur-3xl" />
           <div className="absolute top-1/2 -left-20 w-80 h-80 rounded-full bg-gradient-to-tr from-pink-100/30 to-transparent blur-3xl" />
           {isComfortMode && (
-            <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-rose-300/15 blur-3xl" />
+            <div className="absolute bottom-10 right-10 w-96 h-96 rounded-full bg-danger/15 blur-3xl" />
           )}
         </>
       )}
@@ -40,7 +40,7 @@ export const ThemeBackground = React.memo(function ThemeBackground() {
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-bl from-purple-200/35 via-indigo-100/20 to-transparent blur-3xl" />
           <div className="absolute top-1/3 -left-20 w-80 h-80 rounded-full bg-gradient-to-tr from-violet-100/30 to-transparent blur-3xl" />
           {isComfortMode && (
-            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-purple-300/15 blur-3xl" />
+            <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-severity-deep/20 blur-3xl" />
           )}
         </>
       )}
@@ -51,7 +51,7 @@ export const ThemeBackground = React.memo(function ThemeBackground() {
           <div className="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-gradient-to-bl from-orange-200/30 via-amber-100/25 to-transparent blur-3xl" />
           <div className="absolute top-1/2 -left-20 w-80 h-80 rounded-full bg-gradient-to-tr from-rose-100/25 to-transparent blur-3xl" />
           {isComfortMode && (
-            <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-orange-300/15 blur-3xl" />
+            <div className="absolute bottom-10 left-10 w-96 h-96 rounded-full bg-severity-warm/20 blur-3xl" />
           )}
         </>
       )}
@@ -61,7 +61,7 @@ export const ThemeBackground = React.memo(function ThemeBackground() {
         <>
           <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-gradient-to-b from-stone-100/40 to-transparent blur-3xl" />
           {isComfortMode && (
-            <div className="absolute top-10 right-10 w-96 h-96 rounded-full bg-rose-100/30 blur-3xl" />
+            <div className="absolute top-10 right-10 w-96 h-96 rounded-full bg-danger/15 blur-3xl" />
           )}
         </>
       )}

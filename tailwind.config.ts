@@ -10,48 +10,65 @@ const config: Config = {
   darkMode: ["class"],
   theme: {
     extend: {
+      // NOTE: colors use RGB-channel vars with <alpha-value> so opacity
+      // modifiers (bg-danger/10) and -fg utilities actually resolve.
+      // Nested `fg` (not `foreground`) matches the *-fg classes in use.
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "rgb(var(--background) / <alpha-value>)",
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
         card: {
-          DEFAULT: "var(--card-bg)",
-          foreground: "var(--card-fg)",
+          DEFAULT: "rgb(var(--card-bg) / <alpha-value>)",
+          fg: "rgb(var(--card-fg) / <alpha-value>)",
         },
         primary: {
-          DEFAULT: "var(--primary)",
-          foreground: "var(--primary-fg)",
-          soft: "var(--primary-soft)",
+          DEFAULT: "rgb(var(--primary) / <alpha-value>)",
+          fg: "rgb(var(--primary-fg) / <alpha-value>)",
+          soft: "rgb(var(--primary-soft) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT: "var(--secondary)",
-          foreground: "var(--secondary-fg)",
+          DEFAULT: "rgb(var(--secondary) / <alpha-value>)",
+          fg: "rgb(var(--secondary-fg) / <alpha-value>)",
         },
         accent: {
-          DEFAULT: "var(--accent)",
-          foreground: "var(--accent-fg)",
-          soft: "var(--accent-soft)",
+          DEFAULT: "rgb(var(--accent) / <alpha-value>)",
+          fg: "rgb(var(--accent-fg) / <alpha-value>)",
+          soft: "rgb(var(--accent-soft) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "var(--muted)",
-          foreground: "var(--muted-fg)",
+          DEFAULT: "rgb(var(--muted) / <alpha-value>)",
+          fg: "rgb(var(--muted-fg) / <alpha-value>)",
         },
         // Semantic status palette — Lunara-tinted, replaces raw
         // rose/amber/emerald/blue Tailwind defaults in feedback UI.
         success: {
-          DEFAULT: "var(--success)",
-          foreground: "var(--success-fg)",
+          DEFAULT: "rgb(var(--success) / <alpha-value>)",
+          fg: "rgb(var(--success-fg) / <alpha-value>)",
         },
         warning: {
-          DEFAULT: "var(--warning)",
-          foreground: "var(--warning-fg)",
+          DEFAULT: "rgb(var(--warning) / <alpha-value>)",
+          fg: "rgb(var(--warning-fg) / <alpha-value>)",
         },
         danger: {
-          DEFAULT: "var(--danger)",
-          foreground: "var(--danger-fg)",
+          DEFAULT: "rgb(var(--danger) / <alpha-value>)",
+          fg: "rgb(var(--danger-fg) / <alpha-value>)",
         },
         info: {
-          DEFAULT: "var(--info)",
-          foreground: "var(--info-fg)",
+          DEFAULT: "rgb(var(--info) / <alpha-value>)",
+          fg: "rgb(var(--info-fg) / <alpha-value>)",
+        },
+        // Severity scale tokens (6-bucket pain gradient). Lunara-tinted,
+        // defined alongside success/warning/danger/info the same way.
+        'severity-calm': {
+          DEFAULT: "rgb(var(--severity-calm) / <alpha-value>)",
+          fg: "rgb(var(--severity-calm-fg) / <alpha-value>)",
+        },
+        'severity-warm': {
+          DEFAULT: "rgb(var(--severity-warm) / <alpha-value>)",
+          fg: "rgb(var(--severity-warm-fg) / <alpha-value>)",
+        },
+        'severity-deep': {
+          DEFAULT: "rgb(var(--severity-deep) / <alpha-value>)",
+          fg: "rgb(var(--severity-deep-fg) / <alpha-value>)",
         },
         border: "var(--border)",
         lunara: {
