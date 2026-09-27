@@ -18,6 +18,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
   const [selectedPeriod, setSelectedPeriod] = useState<Period | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -44,10 +45,12 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
     if (!pendingDeleteId) return;
     const id = pendingDeleteId;
     setPendingDeleteId(null);
+    setDeleteError(null);
     try {
       await deletePeriod(id);
     } catch (err) {
       console.error('Delete period error:', err);
+      setDeleteError('Could not delete that record. Check your connection and try again.');
     }
   };
 
@@ -72,6 +75,12 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
               <X className="w-4 h-4" />
             </button>
           </div>
+
+          {deleteError && (
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs shrink-0" role="alert">
+              <span>{deleteError}</span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between shrink-0">
             <span className="text-xs font-semibold text-muted-fg">

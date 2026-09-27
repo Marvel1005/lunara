@@ -127,7 +127,10 @@ export default function JournalPage() {
     }
   };
 
+  const [actionError, setActionError] = useState<string | null>(null);
+
   const handleDeleteEntry = async (id: string) => {
+    setActionError(null);
     try {
       const supabase = createClient();
       const { error } = await supabase.from('journal_entries').delete().eq('id', id);
@@ -135,6 +138,7 @@ export default function JournalPage() {
       setEntries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
       console.error('Failed to delete journal entry:', err);
+      setActionError('Could not delete that entry. Check your connection and try again.');
     }
   };
 
@@ -165,6 +169,7 @@ export default function JournalPage() {
       setEditingEntryId(null);
     } catch (err) {
       console.error('Failed to update journal entry:', err);
+      setActionError('Could not save your changes. Check your connection and try again.');
     }
   };
 
@@ -300,6 +305,12 @@ export default function JournalPage() {
       {/* Entries Section */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-foreground">Past Journal Reflections</h2>
+
+        {actionError && (
+          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+            <span>{actionError}</span>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="space-y-3 animate-pulse">
