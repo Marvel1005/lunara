@@ -161,7 +161,7 @@ export default function SettingsPage() {
           </div>
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 text-xs font-semibold transition-colors cursor-pointer border border-rose-200/40"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-danger/10 text-danger-fg hover:bg-danger/20 text-xs font-semibold transition-colors cursor-pointer border border-danger/30"
             title="Sign out of your Lunara account"
           >
             <LogOut className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                 </button>
               </div>
             )}
-            {nameError && <p className="text-[11px] text-rose-600 mt-1">{nameError}</p>}
+            {nameError && <p className="text-[11px] text-danger mt-1">{nameError}</p>}
             <p className="text-[10px] text-muted-fg font-medium uppercase tracking-wide mt-0.5">{userInfo.accountLabel}</p>
             <p className="text-xs text-muted-fg truncate">{userInfo.accountValue}</p>
             <span className="inline-block text-[10px] font-medium text-primary px-2 py-0.5 rounded-full bg-primary-soft mt-1">
@@ -238,14 +238,14 @@ export default function SettingsPage() {
         </div>
 
         {saveSuccess && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-success/10 border border-success/20 text-success-fg text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Cycle settings saved successfully.</span>
           </div>
         )}
 
         {saveError && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{saveError}</span>
           </div>
@@ -326,7 +326,7 @@ export default function SettingsPage() {
 
       {/* 5. PRIVACY FOOTER NOTE */}
       <div className="flex items-center justify-center gap-2 p-3 text-xs text-muted-fg text-center">
-        <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+        <ShieldCheck className="w-4 h-4 text-success shrink-0" />
         <span>Your cycle and body data is privately encrypted and accessible only to you.</span>
       </div>
     </div>

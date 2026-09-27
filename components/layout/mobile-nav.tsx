@@ -53,7 +53,7 @@ export function MobileNav() {
                 className="flex flex-col items-center justify-center relative -top-3 min-w-[56px] min-h-[48px]"
                 aria-label="I'm hurting check-in"
               >
-                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-rose-500 to-primary text-white flex items-center justify-center shadow-soft border-2 border-background transform active:scale-95 transition-transform">
+                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-danger to-primary text-white flex items-center justify-center shadow-soft border-2 border-background transform active:scale-95 transition-transform">
                   <Icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-[10px] font-semibold text-primary mt-0.5">Hurting</span>

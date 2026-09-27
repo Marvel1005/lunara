@@ -198,14 +198,14 @@ export default function JournalPage() {
         </div>
 
         {saveSuccess && (
-          <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-success/10 border border-success/20 text-success-fg text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>Reflection saved privately to your Supabase sanctuary.</span>
           </div>
         )}
 
         {saveError && (
-          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+          <div className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs" role="alert">
             <span>{saveError}</span>
           </div>
         )}
@@ -307,7 +307,7 @@ export default function JournalPage() {
         <h2 className="text-lg font-bold text-foreground">Past Journal Reflections</h2>
 
         {actionError && (
-          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+          <div className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs" role="alert">
             <span>{actionError}</span>
           </div>
         )}
@@ -318,7 +318,7 @@ export default function JournalPage() {
             <div className="h-28 rounded-3xl bg-muted/30" />
           </div>
         ) : loadError ? (
-          <div className="p-6 rounded-3xl border border-rose-500/20 bg-rose-500/5 text-center space-y-3" role="alert">
+          <div className="p-6 rounded-3xl border border-danger/20 bg-danger/5 text-center space-y-3" role="alert">
             <p className="text-sm font-semibold text-foreground">Couldn&apos;t load your entries</p>
             <p className="text-xs text-muted-fg leading-relaxed">
               Check your connection and try again. Your saved entries are safe.
@@ -361,7 +361,7 @@ export default function JournalPage() {
                     </button>
                     <button
                       onClick={() => handleDeleteEntry(entry.id)}
-                      className="p-1 rounded-lg text-muted-fg hover:text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                      className="p-1 rounded-lg text-muted-fg hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
                       title="Delete Entry"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

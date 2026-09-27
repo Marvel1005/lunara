@@ -78,7 +78,7 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
         <div className="space-y-3">
           {/* General status / I'm hurting */}
           {status.general_status_message && (
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-rose-500/10 to-primary/10 border border-primary/30 shadow-soft">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-danger/10 to-primary/10 border border-primary/30 shadow-soft">
               <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1">Status Notice</p>
               <p className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <span>❤️</span> {status.general_status_message}
@@ -101,16 +101,16 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
             <div
               className={`p-4 rounded-2xl border shadow-soft ${
                 status.has_pain_today
-                  ? 'bg-rose-500/10 border-rose-500/30'
-                  : 'bg-emerald-500/10 border-emerald-500/30'
+                  ? 'bg-danger/10 border-danger/30'
+                  : 'bg-success/10 border-success/30'
               }`}
             >
               {status.has_pain_today ? (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold uppercase tracking-wider text-rose-700">😣 Pain Reported</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-danger-fg">😣 Pain Reported</p>
                     {status.pain_severity !== undefined && (
-                      <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-rose-500 text-white">
+                      <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-danger text-white">
                         {status.pain_severity}/10
                       </span>
                     )}
@@ -120,7 +120,7 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
                   </p>
 
                   {(status.pain_location || status.pain_type) && (
-                    <div className="pt-2 border-t border-rose-500/20 text-xs space-y-1 text-muted-fg">
+                    <div className="pt-2 border-t border-danger/20 text-xs space-y-1 text-muted-fg">
                       {status.pain_location && (
                         <p>
                           <span className="font-bold text-foreground">📍 Location:</span>{' '}
@@ -137,7 +137,7 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
                   )}
                 </div>
               ) : (
-                <p className="text-sm font-semibold text-emerald-800 flex items-center gap-2">
+                <p className="text-sm font-semibold text-success-fg flex items-center gap-2">
                   <span>🌿</span> No pain reported today.
                 </p>
               )}
@@ -229,7 +229,7 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
                   <button
                     type="button"
                     onClick={() => deleteSuggestion(s.id)}
-                    className="text-muted-fg hover:text-rose-600 shrink-0 p-1"
+                    className="text-muted-fg hover:text-danger shrink-0 p-1"
                     aria-label="Delete suggestion"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -240,7 +240,7 @@ export function PartnerDashboard({ status, connectionId }: PartnerDashboardProps
           </ul>
         )}
 
-        {sendError && <p className="text-[11px] text-rose-600">{sendError}</p>}
+        {sendError && <p className="text-[11px] text-danger">{sendError}</p>}
 
         <div className="flex items-center gap-2">
           <input

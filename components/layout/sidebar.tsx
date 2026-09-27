@@ -75,7 +75,7 @@ export function Sidebar() {
           <Link
             href="/pain"
             title="I'm hurting right now"
-            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:shadow-comfort hover:scale-[1.01] transition-all cursor-pointer border border-white/20"
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-danger to-primary text-white text-xs font-semibold shadow-soft hover:shadow-comfort hover:scale-[1.01] transition-all cursor-pointer border border-white/20"
           >
             <HeartPulse className="w-4 h-4 text-white shrink-0" />
             <span className="hidden lg:inline">I&apos;m hurting right now</span>
@@ -109,9 +109,9 @@ export function Sidebar() {
             type="button"
             onClick={handleSignOut}
             title="Sign Out"
-            className="flex items-center md:justify-center lg:justify-start gap-3 md:px-0 lg:px-3.5 py-2.5 rounded-2xl text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 transition-all w-full text-left cursor-pointer mt-1"
+            className="flex items-center md:justify-center lg:justify-start gap-3 md:px-0 lg:px-3.5 py-2.5 rounded-2xl text-xs font-medium text-danger hover:text-danger-fg hover:bg-danger/10 transition-all w-full text-left cursor-pointer mt-1"
           >
-            <LogOut className="w-4 h-4 text-rose-500 shrink-0" />
+            <LogOut className="w-4 h-4 text-danger shrink-0" />
             <span className="hidden lg:inline">Sign Out</span>
           </button>
         </nav>

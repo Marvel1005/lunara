@@ -125,8 +125,8 @@ export function PeriodModal({
 
   const flowOptions: { type: FlowType; label: string; bg: string }[] = [
     { type: 'spotting', label: 'Spotting', bg: 'bg-pink-100 border-pink-300 text-pink-800' },
-    { type: 'light', label: 'Light', bg: 'bg-rose-100 border-rose-300 text-rose-800' },
-    { type: 'medium', label: 'Medium', bg: 'bg-rose-200 border-rose-400 text-rose-900' },
+    { type: 'light', label: 'Light', bg: 'bg-rose-100 border-rose-300 text-danger-fg' },
+    { type: 'medium', label: 'Medium', bg: 'bg-danger/30 border-danger text-danger-fg' },
     { type: 'heavy', label: 'Heavy', bg: 'bg-red-200 border-red-400 text-red-950' },
   ];
 
@@ -151,7 +151,7 @@ export function PeriodModal({
         </div>
 
         {error && (
-          <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -220,7 +220,7 @@ export function PeriodModal({
                 type="button"
                 onClick={handleDelete}
                 disabled={loading}
-                className="p-2 rounded-xl text-rose-600 hover:bg-rose-50 border border-rose-200 transition-colors text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                className="p-2 rounded-xl text-danger hover:bg-rose-50 border border-danger/30 transition-colors text-xs font-semibold flex items-center gap-1 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete</span>

@@ -30,7 +30,7 @@ export function PasswordInput({ label, error, id, className = '', ...props }: Pa
           data-1p-ignore
           autoComplete={props.autoComplete || 'off'}
           className={`w-full px-4 py-3 pr-11 rounded-2xl bg-muted/60 border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all text-foreground h-[52px] [&::-ms-reveal]:hidden [&::-webkit-credentials-auto-fill-button]:hidden ${
-            error ? 'border-rose-400 focus:ring-rose-400/40' : ''
+            error ? 'border-danger focus:ring-danger/40' : ''
           } ${className}`}
           {...props}
         />
@@ -45,7 +45,7 @@ export function PasswordInput({ label, error, id, className = '', ...props }: Pa
         </button>
       </div>
       {error && (
-        <p className="mt-1 text-[11px] text-rose-600">{error}</p>
+        <p className="mt-1 text-[11px] text-danger">{error}</p>
       )}
     </div>
   );

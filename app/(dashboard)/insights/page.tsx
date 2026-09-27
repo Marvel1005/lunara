@@ -152,7 +152,7 @@ export default function InsightsPage() {
             {/* Pain Patterns */}
             <div className="card-depth-secondary p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-danger/10 text-danger flex items-center justify-center font-bold">
                   <HeartPulse className="w-5 h-5" />
                 </div>
                 <div>

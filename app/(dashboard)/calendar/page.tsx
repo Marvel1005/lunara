@@ -164,20 +164,20 @@ export default function CalendarPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={resetToToday}
-              className="px-3.5 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border text-xs font-semibold text-foreground transition-all cursor-pointer tactile-button"
+              className="px-3.5 py-1.5 rounded-xl bg-muted/60 hover:bg-muted border border-border text-xs font-semibold text-foreground transition-all cursor-pointer"
             >
               Today
             </button>
             <button
               onClick={prevMonth}
-              className="p-2 rounded-xl bg-muted/60 hover:bg-muted border border-border text-foreground transition-all cursor-pointer tactile-button"
+              className="p-2 rounded-xl bg-muted/60 hover:bg-muted border border-border text-foreground transition-all cursor-pointer"
               title="Previous Month"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={nextMonth}
-              className="p-2 rounded-xl bg-muted/60 hover:bg-muted border border-border text-foreground transition-all cursor-pointer tactile-button"
+              className="p-2 rounded-xl bg-muted/60 hover:bg-muted border border-border text-foreground transition-all cursor-pointer"
               title="Next Month"
             >
               <ChevronRight className="w-4 h-4" />
@@ -232,7 +232,7 @@ export default function CalendarPage() {
               } else if (status.isPredictedPeriod) {
                 cellStyle = 'bg-primary-soft/30 border-2 border-dashed border-primary/60 text-foreground font-semibold';
               } else if (status.isOvulation) {
-                cellStyle = 'bg-amber-100 border border-amber-300 text-amber-900 font-bold shadow-soft';
+                cellStyle = 'bg-amber-100 border border-warning/50 text-warning-fg font-bold shadow-soft';
               } else if (status.isFertile) {
                 cellStyle = 'bg-purple-100/70 border border-purple-200 text-purple-900 font-medium';
               }

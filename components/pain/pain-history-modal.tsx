@@ -136,7 +136,7 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2">
+            <div className="mb-4 p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -235,7 +235,7 @@ export function PainHistoryModal({ isOpen, onClose }: PainHistoryModalProps) {
                           <button
                             onClick={() => handleDelete(log.id)}
                             disabled={isDeleting}
-                            className="p-2 rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            className="p-2 rounded-xl text-danger hover:bg-danger/10 transition-colors cursor-pointer"
                             title="Delete log"
                           >
                             <Trash2 className="w-4 h-4" />

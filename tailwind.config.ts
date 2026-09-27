@@ -35,6 +35,24 @@ const config: Config = {
           DEFAULT: "var(--muted)",
           foreground: "var(--muted-fg)",
         },
+        // Semantic status palette — Lunara-tinted, replaces raw
+        // rose/amber/emerald/blue Tailwind defaults in feedback UI.
+        success: {
+          DEFAULT: "var(--success)",
+          foreground: "var(--success-fg)",
+        },
+        warning: {
+          DEFAULT: "var(--warning)",
+          foreground: "var(--warning-fg)",
+        },
+        danger: {
+          DEFAULT: "var(--danger)",
+          foreground: "var(--danger-fg)",
+        },
+        info: {
+          DEFAULT: "var(--info)",
+          foreground: "var(--info-fg)",
+        },
         border: "var(--border)",
         lunara: {
           cream: "#FDFBF7",

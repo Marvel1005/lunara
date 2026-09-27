@@ -43,10 +43,10 @@ export function PainMeter({ value, onChange, disabled = false }: PainMeterProps)
 
       {/* 5-Bucket Range Guidance Indicator */}
       <div className="grid grid-cols-5 gap-1 text-[10px] font-semibold text-center text-muted-fg">
-        <div className={`p-1 rounded-lg ${value === 0 ? 'bg-emerald-500/10 text-emerald-700 font-bold' : ''}`}>Nothing (0)</div>
-        <div className={`p-1 rounded-lg ${value >= 1 && value <= 3 ? 'bg-blue-500/10 text-blue-700 font-bold' : ''}`}>Mild (1–3)</div>
-        <div className={`p-1 rounded-lg ${value >= 4 && value <= 6 ? 'bg-amber-500/10 text-amber-700 font-bold' : ''}`}>Moderate (4–6)</div>
-        <div className={`p-1 rounded-lg ${value >= 7 && value <= 8 ? 'bg-rose-500/10 text-rose-700 font-bold' : ''}`}>Strong (7–8)</div>
+        <div className={`p-1 rounded-lg ${value === 0 ? 'bg-success/10 text-success-fg font-bold' : ''}`}>Nothing (0)</div>
+        <div className={`p-1 rounded-lg ${value >= 1 && value <= 3 ? 'bg-info/10 text-info-fg font-bold' : ''}`}>Mild (1–3)</div>
+        <div className={`p-1 rounded-lg ${value >= 4 && value <= 6 ? 'bg-warning/10 text-warning-fg font-bold' : ''}`}>Moderate (4–6)</div>
+        <div className={`p-1 rounded-lg ${value >= 7 && value <= 8 ? 'bg-danger/10 text-danger-fg font-bold' : ''}`}>Strong (7–8)</div>
         <div className={`p-1 rounded-lg ${value >= 9 ? 'bg-purple-500/10 text-purple-700 font-bold' : ''}`}>Very strong (9–10)</div>
       </div>
 

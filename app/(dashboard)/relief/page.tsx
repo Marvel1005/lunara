@@ -60,13 +60,13 @@ export default function ReliefPage() {
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
           <button
             onClick={() => setIsHistoryModalOpen(true)}
-            className="px-4 py-2.5 rounded-2xl bg-muted/60 hover:bg-muted border border-border text-xs font-semibold text-foreground transition-all cursor-pointer min-h-[44px] tactile-button"
+            className="px-4 py-2.5 rounded-2xl bg-muted/60 hover:bg-muted border border-border text-xs font-semibold text-foreground transition-all cursor-pointer min-h-[44px]"
           >
             Pain Logs History
           </button>
           <button
             onClick={() => setIsHurtingModalOpen(true)}
-            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-bold shadow-comfort hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer min-h-[44px] tactile-button"
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-danger to-primary text-white text-xs font-bold shadow-comfort hover:opacity-95 transition-all flex items-center gap-1.5 cursor-pointer min-h-[44px] tactile-button"
           >
             <HeartPulse className="w-4 h-4" />
             <span>I&apos;m Hurting Right Now</span>
@@ -122,16 +122,15 @@ export default function ReliefPage() {
         {/* 1. WARMTH */}
         {(activeCategory === 'all' || activeCategory === 'warmth') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
-            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-danger/10 text-danger flex items-center justify-center font-bold">
               <Flame className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Warmth & Heat Therapy</h3>
             <p className="text-xs text-muted-fg leading-relaxed">
               Applying a heating pad or warm towel to your lower abdomen or lower back may feel soothing for tight pelvic muscles.
             </p>
-            <div className="p-3 rounded-2xl bg-rose-500/5 border border-rose-200 text-[11px] text-rose-900 space-y-1">
-              <span className="font-bold block text-rose-950">Safe Use Notice:</span>
+            <div className="p-3 rounded-2xl bg-danger/5 border border-danger/30 text-[11px] text-danger-fg space-y-1">
+              <span className="font-bold block text-danger-fg">Safe Use Notice:</span>
               <p>
                 Always place a cloth layer between skin and heat source. Avoid sleeping with an active heating pad turned on.
               </p>
@@ -142,7 +141,6 @@ export default function ReliefPage() {
         {/* 2. REST */}
         {(activeCategory === 'all' || activeCategory === 'rest') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
             <div className="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold">
               <BedDouble className="w-5 h-5" />
             </div>
@@ -166,8 +164,7 @@ export default function ReliefPage() {
         {/* 3. HYDRATION */}
         {(activeCategory === 'all' || activeCategory === 'hydration') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
-            <div className="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-info/10 text-info flex items-center justify-center font-bold">
               <Coffee className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Hydration & Herbal Elixirs</h3>
@@ -183,15 +180,14 @@ export default function ReliefPage() {
         {/* 4. GENTLE MOVEMENT */}
         {(activeCategory === 'all' || activeCategory === 'movement') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-success/10 text-success flex items-center justify-center font-bold">
               <Activity className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Gentle Movement & Stretching</h3>
             <p className="text-xs text-muted-fg leading-relaxed">
               Light cat-cow stretches or a short easy walk may feel soothing if you feel up to it. Stop immediately if any movement causes discomfort.
             </p>
-            <div className="text-[11px] text-emerald-800 bg-emerald-500/10 p-2.5 rounded-xl font-medium">
+            <div className="text-[11px] text-success-fg bg-success/10 p-2.5 rounded-xl font-medium">
               Listen to your body — rest whenever needed.
             </div>
           </div>
@@ -200,8 +196,7 @@ export default function ReliefPage() {
         {/* 5. POSITIONING */}
         {(activeCategory === 'all' || activeCategory === 'positioning') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
-            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-warning/10 text-amber-600 flex items-center justify-center font-bold">
               <Maximize2 className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Supported Body Positioning</h3>
@@ -217,7 +212,6 @@ export default function ReliefPage() {
         {/* 6. HEAD DISCOMFORT */}
         {(activeCategory === 'all' || activeCategory === 'head') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <ThemeCornerDecor size="sm" className="top-1 right-1" />
             <div className="w-10 h-10 rounded-2xl bg-teal-500/10 text-teal-600 flex items-center justify-center font-bold">
               <HeartPulse className="w-5 h-5" />
             </div>

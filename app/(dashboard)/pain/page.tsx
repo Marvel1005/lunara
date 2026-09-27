@@ -55,17 +55,17 @@ export default function PainPage() {
       </div>
 
       {saveSuccess && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs flex items-center gap-2.5 shadow-soft">
+        <div className="p-3.5 rounded-2xl bg-success/10 border border-success/20 text-success-fg text-xs flex items-center gap-2.5 shadow-soft">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <div>
-            <span className="font-bold block text-emerald-950">Pain log saved</span>
+            <span className="font-bold block text-success-fg">Pain log saved</span>
             <span>Your check-in has been stored securely in your private health log.</span>
           </div>
         </div>
       )}
 
       {saveError && (
-        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+        <div className="p-3.5 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs" role="alert">
           <span>{saveError}</span>
         </div>
       )}
@@ -120,7 +120,7 @@ export default function PainPage() {
           <button
             type="submit"
             disabled={isAdding}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-bold shadow-soft hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 tactile-button"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-danger to-primary text-white text-xs font-bold shadow-soft hover:opacity-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 tactile-button"
           >
             <Sparkles className="w-4 h-4" />
             <span>{isAdding ? 'Saving...' : 'Save Check-in'}</span>

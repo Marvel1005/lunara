@@ -166,7 +166,7 @@ export function PartnerSettings() {
               {/* Trust feature pills */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-left max-w-lg mx-auto">
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/70 text-xs text-muted-fg flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold text-foreground block">Private by Default</span>
                     <span className="text-[11px] leading-tight">Nothing shared until you choose.</span>
@@ -174,7 +174,7 @@ export function PartnerSettings() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/70 text-xs text-muted-fg flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold text-foreground block">You Control All</span>
                     <span className="text-[11px] leading-tight">Select exact metrics to share.</span>
@@ -182,7 +182,7 @@ export function PartnerSettings() {
                 </div>
 
                 <div className="p-3 rounded-xl bg-muted/40 border border-border/70 text-xs text-muted-fg flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                   <div>
                     <span className="font-semibold text-foreground block">Instant Revoke</span>
                     <span className="text-[11px] leading-tight">Pause or stop anytime.</span>
@@ -212,7 +212,7 @@ export function PartnerSettings() {
             <div
               className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-soft ${
                 liveConnection.status === 'active'
-                  ? 'bg-emerald-50/80 border-emerald-200 text-emerald-950'
+                  ? 'bg-emerald-50/80 border-emerald-200 text-success-fg'
                   : 'bg-amber-50/80 border-amber-200 text-amber-950'
               }`}
             >
@@ -241,7 +241,7 @@ export function PartnerSettings() {
                     id="pause-sharing-btn"
                     onClick={() => handlePause(liveConnection)}
                     disabled={isPausing}
-                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-amber-300 bg-amber-100/70 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-warning/50 bg-amber-100/70 hover:bg-amber-100 text-warning-fg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Pause className="w-3.5 h-3.5" />
                     <span>{isPausing ? 'Pausing…' : 'Pause Sharing'}</span>

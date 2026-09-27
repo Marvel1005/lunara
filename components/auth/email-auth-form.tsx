@@ -263,7 +263,7 @@ export function EmailMagicLinkForm({
 
         {error && (
           <div
-            className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+            className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2"
             role="alert"
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -321,7 +321,7 @@ export function EmailMagicLinkForm({
 
         {error && (
           <div
-            className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+            className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2"
             role="alert"
           >
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -391,7 +391,7 @@ export function EmailMagicLinkForm({
 
       {error && (
         <div
-          className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+          className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2"
           role="alert"
         >
           <AlertCircle className="w-4 h-4 shrink-0" />

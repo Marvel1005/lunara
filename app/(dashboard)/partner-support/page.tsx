@@ -87,7 +87,7 @@ export default function PartnerSupportPage() {
       {/* Privacy footer */}
       <div className="p-3.5 rounded-2xl bg-muted/30 border border-border/60 text-center">
         <p className="text-xs text-muted-fg leading-relaxed flex items-center justify-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-success shrink-0" />
           <span>Your cycle and body data is encrypted and private. Only items you explicitly enable are shared.</span>
         </p>
       </div>

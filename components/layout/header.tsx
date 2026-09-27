@@ -85,7 +85,7 @@ export function Header({ userName: initialName }: HeaderProps) {
           <button
             type="button"
             onClick={handleSignOut}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-500/10 transition-colors border border-rose-200/40 cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium text-danger hover:text-danger-fg hover:bg-danger/10 transition-colors border border-danger/30 cursor-pointer"
             title="Sign Out"
           >
             <LogOut className="w-3.5 h-3.5" />

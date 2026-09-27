@@ -6,7 +6,7 @@ import { ShieldCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { PasswordInput, validatePassword, passwordStrength } from '@/components/password-input';
 
-const STRENGTH_COLORS = ['bg-rose-400', 'bg-amber-400', 'bg-emerald-400', 'bg-emerald-500'];
+const STRENGTH_COLORS = ['bg-danger', 'bg-warning', 'bg-success', 'bg-success'];
 
 export default function SetPasswordPage() {
   const router = useRouter();
@@ -110,7 +110,7 @@ export default function SetPasswordPage() {
 
       {error && (
         <div
-          className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2"
+          className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2"
           role="alert"
         >
           <AlertCircle className="w-4 h-4 shrink-0" />

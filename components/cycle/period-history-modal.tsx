@@ -77,7 +77,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
           </div>
 
           {deleteError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs shrink-0" role="alert">
+            <div className="p-3 rounded-xl bg-danger/10 border border-danger/20 text-danger-fg text-xs shrink-0" role="alert">
               <span>{deleteError}</span>
             </div>
           )}
@@ -118,7 +118,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
                         {p.end_date ? formatDateLabel(p.end_date) : 'Ongoing'}
                       </span>
                       {p.flow && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 uppercase tracking-wider">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-danger/10 text-danger-fg uppercase tracking-wider">
                           {p.flow}
                         </span>
                       )}
@@ -136,7 +136,7 @@ export function PeriodHistoryModal({ isOpen, onClose }: PeriodHistoryModalProps)
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
-                      className="p-1.5 rounded-xl text-muted-fg hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-xl text-muted-fg hover:text-danger hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Delete entry"
                     >
                       <Trash2 className="w-4 h-4" />

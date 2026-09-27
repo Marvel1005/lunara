@@ -99,7 +99,7 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
         <div>
           <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-5">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-700 flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-full bg-danger/10 text-danger-fg flex items-center justify-center font-bold">
                 <HeartPulse className="w-4 h-4" />
               </div>
               <div>
@@ -118,7 +118,7 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
           </div>
 
           {errorMessage && (
-            <div className="mb-4 p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs flex items-center gap-2">
+            <div className="mb-4 p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -195,18 +195,18 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
 
               {/* Dynamic Comfort Cards */}
               <div className="space-y-2.5">
-                <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-200 flex items-start gap-3">
-                  <Flame className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-danger/10 border border-danger/30 flex items-start gap-3">
+                  <Flame className="w-5 h-5 text-danger shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-rose-900">Gentle Soothing Heat</h4>
-                    <p className="text-[11px] text-rose-800 mt-0.5 leading-relaxed">
+                    <h4 className="text-xs font-bold text-danger-fg">Gentle Soothing Heat</h4>
+                    <p className="text-[11px] text-danger-fg mt-0.5 leading-relaxed">
                       A heating pad or warm compress on your lower abdomen or lower back may feel soothing. (Avoid sleeping with an active heating pad).
                     </p>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-200 flex items-start gap-3">
-                  <Coffee className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-2xl bg-info/10 border border-info/30 flex items-start gap-3">
+                  <Coffee className="w-5 h-5 text-info shrink-0 mt-0.5" />
                   <div>
                     <h4 className="text-xs font-bold text-blue-900">Warm Hydration</h4>
                     <p className="text-[11px] text-blue-800 mt-0.5 leading-relaxed">

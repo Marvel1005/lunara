@@ -23,6 +23,15 @@
   --muted-fg: #7A6F73;
   --border: #EFE8DF;
   --border-accent: #E4D5CE;
+  /* Semantic status palette (Lunara-tinted) */
+  --success: #5E8F71;
+  --success-fg: #35603F;
+  --warning: #C98F2E;
+  --warning-fg: #8A5C14;
+  --danger: #C65D68;
+  --danger-fg: #96333C;
+  --info: #7E88B8;
+  --info-fg: #49548C;
   --header-bg: rgba(253, 251, 247, 0.85);
   --glow-accent: rgba(156, 114, 125, 0.12);
   --shadow-elevated: 0 12px 32px -8px rgba(74, 46, 53, 0.08);

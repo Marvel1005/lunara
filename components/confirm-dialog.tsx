@@ -65,7 +65,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             autoFocus
-            className="flex-1 px-3 py-2.5 rounded-xl bg-rose-500 text-white text-xs font-semibold hover:opacity-90 transition-all cursor-pointer min-h-[44px]"
+            className="flex-1 px-3 py-2.5 rounded-xl bg-danger text-white text-xs font-semibold hover:opacity-90 transition-all cursor-pointer min-h-[44px]"
           >
             {confirmLabel}
           </button>

@@ -172,7 +172,7 @@ export default function MoviesPage() {
       )}
 
       {toggleError && (
-        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-700 text-xs" role="alert">
+        <div className="p-3.5 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs" role="alert">
           <span>Could not update your saved movies. Check your connection and try again.</span>
         </div>
       )}

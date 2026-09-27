@@ -117,7 +117,7 @@ export default function DashboardPage() {
               <>
                 <button
                   onClick={() => setIsHurtingOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[44px] tactile-button"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-danger to-primary text-white text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[44px] tactile-button"
                 >
                   <HeartPulse className="w-4 h-4" />
                   <span>I&apos;m Hurting</span>
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                     onClick={() => updateWellness({ energy: lvl.toLowerCase() })}
                     className={`flex-1 py-1.5 rounded-xl text-[10px] font-semibold transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-amber-500 text-white shadow-soft font-bold'
+                        ? 'bg-warning text-white shadow-soft font-bold'
                         : 'bg-muted/50 text-muted-fg hover:bg-muted'
                     }`}
                   >
@@ -272,15 +272,15 @@ export default function DashboardPage() {
           <div className="p-4 rounded-3xl border border-border bg-card/40 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-blue-500" />
+                <Droplets className="w-4 h-4 text-info" />
                 <span className="text-xs font-bold text-foreground">Hydration</span>
               </div>
-              <span className="text-xs font-bold text-blue-600">{waterMl} ml</span>
+              <span className="text-xs font-bold text-info">{waterMl} ml</span>
             </div>
 
             <div className="w-full h-1.5 rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full bg-blue-500 rounded-full transition-all duration-300"
+                className="h-full bg-info rounded-full transition-all duration-300"
                 style={{ width: `${Math.min(100, (waterMl / 2000) * 100)}%` }}
               />
             </div>
@@ -288,13 +288,13 @@ export default function DashboardPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => updateWellness({ water_ml: waterMl + 250 })}
-                className="flex-1 py-1.5 rounded-xl bg-blue-500/10 text-blue-700 text-xs font-semibold hover:bg-blue-500/20 transition-colors"
+                className="flex-1 py-1.5 rounded-xl bg-info/10 text-info-fg text-xs font-semibold hover:bg-info/20 transition-colors"
               >
                 + 250 ml
               </button>
               <button
                 onClick={() => updateWellness({ water_ml: waterMl + 500 })}
-                className="flex-1 py-1.5 rounded-xl bg-blue-500/10 text-blue-700 text-xs font-semibold hover:bg-blue-500/20 transition-colors"
+                className="flex-1 py-1.5 rounded-xl bg-info/10 text-info-fg text-xs font-semibold hover:bg-info/20 transition-colors"
               >
                 + 500 ml
               </button>

@@ -353,8 +353,8 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
                 className="space-y-4"
               >
                 {emailSent && (
-                  <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-xs text-emerald-800">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="p-3 rounded-2xl bg-success/10 border border-success/20 flex items-center gap-2 text-xs text-success-fg">
+                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                     <span>Invitation email sent to {partnerEmail}</span>
                   </div>
                 )}
@@ -376,7 +376,7 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
                       onClick={handleCopy}
                       className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shrink-0 cursor-pointer ${
                         copied
-                          ? 'bg-emerald-600 text-white shadow-soft'
+                          ? 'bg-success text-white shadow-soft'
                           : 'bg-primary text-primary-fg hover:opacity-95'
                       }`}
                     >
