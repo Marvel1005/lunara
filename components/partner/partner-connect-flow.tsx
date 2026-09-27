@@ -166,9 +166,15 @@ export function PartnerConnectFlow({ onClose }: PartnerConnectFlowProps) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: '100%', opacity: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        drag={step === 'sending' ? false : 'y'}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.35}
+        onDragEnd={(_, info) => {
+          if (info.offset.y > 120 && step !== 'sending') onClose();
+        }}
       >
-        {/* Mobile drag handle */}
-        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+        {/* Mobile drag handle — wired to the drag-to-dismiss gesture above */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden cursor-grab active:cursor-grabbing touch-none">
           <div className="w-10 h-1 rounded-full bg-muted" />
         </div>
 

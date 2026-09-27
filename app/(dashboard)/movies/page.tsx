@@ -211,7 +211,7 @@ export default function MoviesPage() {
             <button
               key={tab.key}
               onClick={() => setActiveCategory(tab.key as MovieCategory)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[40px] ${
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer min-h-[44px] ${
                 isActive
                   ? 'bg-primary text-primary-fg shadow-soft font-bold'
                   : 'bg-muted/40 hover:bg-muted text-foreground border border-border/70'

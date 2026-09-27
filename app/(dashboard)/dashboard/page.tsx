@@ -117,7 +117,7 @@ export default function DashboardPage() {
               <>
                 <button
                   onClick={() => setIsHurtingOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[40px] tactile-button"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-rose-500 to-primary text-white text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[44px] tactile-button"
                 >
                   <HeartPulse className="w-4 h-4" />
                   <span>I&apos;m Hurting</span>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
 
                 <button
                   onClick={() => setIsLogPeriodOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-primary text-primary-fg text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[40px] tactile-button"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-primary text-primary-fg text-xs font-semibold shadow-soft hover:opacity-95 transition-all cursor-pointer min-h-[44px] tactile-button"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Log Period</span>
@@ -133,7 +133,7 @@ export default function DashboardPage() {
 
                 <button
                   onClick={() => setIsHistoryOpen(true)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-muted/60 hover:bg-muted border border-border text-foreground text-xs font-medium transition-all cursor-pointer min-h-[40px]"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-muted/60 hover:bg-muted border border-border text-foreground text-xs font-medium transition-all cursor-pointer min-h-[44px]"
                 >
                   <CalendarIcon className="w-3.5 h-3.5 text-muted-fg" />
                   <span>History</span>
