@@ -212,8 +212,8 @@ export function PartnerSettings() {
             <div
               className={`p-4 sm:p-5 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-soft ${
                 liveConnection.status === 'active'
-                  ? 'bg-emerald-50/80 border-emerald-200 text-success-fg'
-                  : 'bg-amber-50/80 border-amber-200 text-amber-950'
+                  ? 'bg-success/10 border-success/30 text-success-fg'
+                  : 'bg-warning/10 border-warning/30 text-warning-fg'
               }`}
             >
               <div className="space-y-0.5">
@@ -241,7 +241,7 @@ export function PartnerSettings() {
                     id="pause-sharing-btn"
                     onClick={() => handlePause(liveConnection)}
                     disabled={isPausing}
-                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-warning/50 bg-amber-100/70 hover:bg-amber-100 text-warning-fg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-warning/50 bg-warning/15 hover:bg-warning/20 text-warning-fg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Pause className="w-3.5 h-3.5" />
                     <span>{isPausing ? 'Pausing…' : 'Pause Sharing'}</span>
@@ -251,7 +251,7 @@ export function PartnerSettings() {
                     id="resume-sharing-btn"
                     onClick={() => handleResume(liveConnection)}
                     disabled={isResuming}
-                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-emerald-300 bg-emerald-100/70 hover:bg-emerald-100 text-emerald-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-success/40 bg-success/15 hover:bg-success/20 text-success-fg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Play className="w-3.5 h-3.5" />
                     <span>{isResuming ? 'Resuming…' : 'Resume Sharing'}</span>

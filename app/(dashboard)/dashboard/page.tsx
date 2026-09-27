@@ -240,7 +240,7 @@ export default function DashboardPage() {
           <div className="p-4 rounded-3xl border border-border bg-card/40 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-600" />
+                <Zap className="w-4 h-4 text-warning" />
                 <span className="text-xs font-bold text-foreground">Energy</span>
               </div>
               <span className="text-xs font-semibold text-primary capitalize">

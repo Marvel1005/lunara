@@ -208,8 +208,8 @@ export function HurtingFlowModal({ isOpen, onClose }: HurtingFlowModalProps) {
                 <div className="p-3.5 rounded-2xl bg-info/10 border border-info/30 flex items-start gap-3">
                   <Coffee className="w-5 h-5 text-info shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-blue-900">Warm Hydration</h4>
-                    <p className="text-[11px] text-blue-800 mt-0.5 leading-relaxed">
+                    <h4 className="text-xs font-bold text-info-fg">Warm Hydration</h4>
+                    <p className="text-[11px] text-info-fg mt-0.5 leading-relaxed">
                       Sipping warm water or herbal chamomile tea may help relax tense muscles.
                     </p>
                   </div>

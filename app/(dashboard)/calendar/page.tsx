@@ -196,7 +196,7 @@ export default function CalendarPage() {
             <span>Predicted Period</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="w-3.5 h-3.5 rounded-md bg-amber-200 text-amber-800 text-[10px] flex items-center justify-center font-bold">
+            <span className="w-3.5 h-3.5 rounded-md bg-warning/25 text-warning-fg text-[10px] flex items-center justify-center font-bold">
               ✨
             </span>
             <span>Estimated Ovulation</span>
@@ -276,7 +276,7 @@ export default function CalendarPage() {
                       <span className="text-[8px] font-semibold text-primary block leading-none">Predicted</span>
                     )}
                     {status.isOvulation && (
-                      <span className="text-[8px] font-bold text-amber-800 block leading-none">Ovulation</span>
+                      <span className="text-[8px] font-bold text-warning-fg block leading-none">Ovulation</span>
                     )}
                     {status.isFertile && !status.isOvulation && (
                       <span className="text-[8px] font-medium text-purple-700 block leading-none">Fertile</span>

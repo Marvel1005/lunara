@@ -196,7 +196,7 @@ export default function ReliefPage() {
         {/* 5. POSITIONING */}
         {(activeCategory === 'all' || activeCategory === 'positioning') && (
           <div className="card-depth-secondary p-6 space-y-3 relative overflow-hidden">
-            <div className="w-10 h-10 rounded-2xl bg-warning/10 text-amber-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-warning/10 text-warning flex items-center justify-center font-bold">
               <Maximize2 className="w-5 h-5" />
             </div>
             <h3 className="text-base font-bold text-foreground">Supported Body Positioning</h3>
