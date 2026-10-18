@@ -11,7 +11,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Lunara App Error:', error);
+    console.error('Lunara App Error:', error.message, error.digest ?? '');
   }, [error]);
 
   return (

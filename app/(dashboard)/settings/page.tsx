@@ -327,7 +327,7 @@ export default function SettingsPage() {
       {/* 5. PRIVACY FOOTER NOTE */}
       <div className="flex items-center justify-center gap-2 p-3 text-xs text-muted-fg text-center">
         <ShieldCheck className="w-4 h-4 text-success shrink-0" />
-        <span>Your cycle and body data is privately encrypted and accessible only to you.</span>
+        <span>Your cycle and body data is private and accessible only to you.</span>
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export default function PainPage() {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
     } catch (err) {
-      console.error('Failed to log pain entry:', err);
+      console.error('Failed to log pain entry:', err instanceof Error ? err.message : 'Unknown error');
       setSaveError('Could not save your check-in. Check your connection and try again.');
     }
   };

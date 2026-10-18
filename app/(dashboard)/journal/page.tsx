@@ -62,7 +62,7 @@ export default function JournalPage() {
         setEntries(data as JournalEntry[]);
       }
     } catch (err) {
-      console.error('Failed to fetch journal entries from Supabase:', err);
+      console.error('Failed to fetch journal entries:', err instanceof Error ? err.message : 'Unknown error');
       setLoadError(true);
     } finally {
       setIsLoading(false);
@@ -120,7 +120,7 @@ export default function JournalPage() {
         setTimeout(() => setSaveSuccess(false), 3000);
       }
     } catch (err) {
-      console.error('Failed to save journal entry to Supabase:', err);
+      console.error('Failed to save journal entry:', err instanceof Error ? err.message : 'Unknown error');
       setSaveError('Could not save your entry. Check your connection and try again.');
     } finally {
       setIsSaving(false);
@@ -137,7 +137,7 @@ export default function JournalPage() {
       if (error) throw error;
       setEntries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
-      console.error('Failed to delete journal entry:', err);
+      console.error('Failed to delete journal entry:', err instanceof Error ? err.message : 'Unknown error');
       setActionError('Could not delete that entry. Check your connection and try again.');
     }
   };
@@ -168,7 +168,7 @@ export default function JournalPage() {
       );
       setEditingEntryId(null);
     } catch (err) {
-      console.error('Failed to update journal entry:', err);
+      console.error('Failed to update journal entry:', err instanceof Error ? err.message : 'Unknown error');
       setActionError('Could not save your changes. Check your connection and try again.');
     }
   };

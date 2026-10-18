@@ -10,7 +10,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Lunara Global Error:', error);
+    console.error('Lunara Global Error:', error.message, error.digest ?? '');
   }, [error]);
 
   return (

@@ -39,13 +39,14 @@ function friendlyEmailError(msg: string): string {
 
 function friendlyVerifyError(msg: string): string {
   const lower = msg.toLowerCase();
-  if (lower.includes('expired'))
-    return 'That code has expired. Please request a new one.';
-  if (lower.includes('invalid') || lower.includes('incorrect') || lower.includes('not found'))
-    return 'That code is incorrect. Please check and try again.';
-  if (lower.includes('rate limit') || lower.includes('too many'))
+  if (lower.includes('rate limit') || lower.includes('too many') || lower.includes('wait'))
     return 'Too many attempts. Please wait a few minutes before trying again.';
-  return 'Something went wrong. Please request a new code.';
+  if (lower.includes('network') || lower.includes('fetch'))
+    return 'Network error. Please check your connection and try again.';
+  // The server returns one generic message for all verification failures.
+  return msg && msg !== 'Verification failed.'
+    ? msg
+    : 'That code is incorrect or has expired. Please request a new one.';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -130,29 +131,27 @@ export function EmailMagicLinkForm({
     setLoading(true);
     setError(null);
     try {
-      const supabase = createClient();
-      const { error: sendError } = await supabase.auth.signInWithOtp({
-        email: normalizeEmail(email),
-        options: {
-          ...(showName && name.trim() ? { data: { name: name.trim() } } : {}),
-        },
+      const res = await fetch('/auth/otp-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: normalizeEmail(email),
+          ...(showName && name.trim() ? { name: name.trim() } : {}),
+        }),
       });
+      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
 
-      if (sendError) {
-        const friendly = friendlyEmailError(sendError.message);
-        setError(friendly);
-        const lower = sendError.message.toLowerCase();
-        if (lower.includes('rate limit') || lower.includes('too many') || lower.includes('429')) {
-          startCooldown();
-        }
+      if (!res.ok || !data.ok) {
+        setError(data.error ? friendlyEmailError(data.error) : 'Something went wrong. Please try again.');
+        if (res.status === 429) startCooldown();
         return;
       }
 
       setSentEmail(normalizeEmail(email));
       setCode('');
       startCooldown();
-    } catch (err: unknown) {
-      setError(friendlyEmailError(err instanceof Error ? err.message : 'Unknown error'));
+    } catch {
+      setError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -257,7 +256,7 @@ export function EmailMagicLinkForm({
               : ' Enter it below to create your account and sign in.'}
           </p>
           <p className="text-[11px] text-muted-fg/80 leading-relaxed">
-            Your code is single-use and expires in 1 hour.
+            Your code is single-use and expires in 10 minutes.
           </p>
         </div>
 
