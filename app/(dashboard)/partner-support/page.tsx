@@ -6,6 +6,7 @@ import { useMyPartnerConnections } from '@/lib/hooks/use-partner';
 import { usePartnerViewConnections, useSharedPartnerStatus } from '@/lib/hooks/use-partner';
 import { PartnerDashboard } from '@/components/partner/partner-dashboard';
 import { usePartnerMode } from '@/lib/hooks/use-partner-mode';
+import { DataErrorBanner } from '@/components/data-error-banner';
 import { Heart, ShieldCheck } from 'lucide-react';
 
 function PartnerView() {
@@ -13,9 +14,12 @@ function PartnerView() {
   const activePartnerConn =
     partnerConnections.data?.find((c) => c.status === 'active') ?? null;
 
-  const { data: sharedStatus, isLoading } = useSharedPartnerStatus(
-    activePartnerConn?.connection_id ?? null
-  );
+  const {
+    data: sharedStatus,
+    isLoading,
+    isError,
+    refetch,
+  } = useSharedPartnerStatus(activePartnerConn?.connection_id ?? null);
 
   if (partnerConnections.isLoading || isLoading) {
     return (
@@ -24,6 +28,15 @@ function PartnerView() {
         <div className="h-40 rounded-3xl bg-muted/30" />
         <span className="sr-only">Loading partner updates…</span>
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <DataErrorBanner
+        message="Couldn't load shared updates. If this keeps happening, sign out and back in on this device."
+        onRetry={() => refetch()}
+      />
     );
   }
 

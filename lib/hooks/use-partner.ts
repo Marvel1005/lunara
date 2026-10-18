@@ -215,6 +215,12 @@ export function useSharedPartnerStatus(connection_id: string | null) {
         p_connection_id: connection_id!,
       });
       if (error) throw new Error(error.message);
+      // The RPC returns HTTP 200 with an error payload (expired session,
+      // unauthorized). Surface it as a query error — never cache it as data,
+      // or the UI would render a silent "Nothing shared" state.
+      if (data && typeof data === 'object' && 'error' in data) {
+        throw new Error(String((data as { error: unknown }).error));
+      }
       return data as SharedPartnerStatus;
     },
   });
