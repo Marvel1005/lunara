@@ -91,7 +91,7 @@ export function CycleSetupModal({ isOpen, onClose }: CycleSetupModalProps) {
       <div className="w-full max-w-lg glass-panel p-5 sm:p-6 rounded-2xl shadow-comfort border border-white/60 text-foreground relative space-y-5">
         <div className="flex items-center gap-3 border-b border-border/60 pb-4">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center shadow-soft">
-            <Sparkles className="w-5 h-5 text-lunara-plum" />
+            <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">Welcome to Lunara Cycle Setup</h2>

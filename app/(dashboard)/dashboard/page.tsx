@@ -24,6 +24,8 @@ import { usePeriods } from '@/lib/hooks/use-periods';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
 import { useTodayWellness, useTodayMood } from '@/lib/hooks/use-wellness';
 import { calculateCycleSummary } from '@/lib/cycle/engine';
+import { SkeletonPage } from '@/components/skeleton';
+import { DataErrorBanner } from '@/components/data-error-banner';
 import dynamic from 'next/dynamic';
 import { ThemeBadge } from '@/components/theme/theme-decorations';
 
@@ -49,7 +51,7 @@ export default function DashboardPage() {
   const { userName } = useAuth();
 
   // Real Supabase persistence hooks
-  const { periods } = usePeriods();
+  const { periods, isLoading: isLoadingPeriods, isError: periodsError, refetchPeriods } = usePeriods();
   const { settings } = useCycleSettings();
   const { waterMl, sleepHours, energy, updateWellness } = useTodayWellness();
   const { mood, setMood } = useTodayMood();
@@ -91,6 +93,10 @@ export default function DashboardPage() {
     Math.round((summary.currentCycleDay / summary.totalCycleLength) * 100)
   );
 
+  if (isLoadingPeriods) {
+    return <SkeletonPage label="Loading your sanctuary" />;
+  }
+
   return (
     <div className="space-y-5 pb-10 max-w-4xl mx-auto">
       {/* Modals */}
@@ -98,6 +104,13 @@ export default function DashboardPage() {
       <PeriodModal isOpen={isLogPeriodOpen} onClose={() => setIsLogPeriodOpen(false)} />
       <PeriodHistoryModal isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
       <HurtingFlowModal isOpen={isHurtingOpen} onClose={() => setIsHurtingOpen(false)} />
+
+      {periodsError && (
+        <DataErrorBanner
+          message="Couldn't load your cycle history. The dashboard below may be incomplete."
+          onRetry={() => refetchPeriods()}
+        />
+      )}
 
       {/* 1. GENTLE HEADER & IMMEDIATE ACTIONS */}
       <section className="space-y-3 pt-2">

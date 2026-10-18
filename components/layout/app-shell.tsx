@@ -14,6 +14,9 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen flex bg-background text-foreground transition-colors duration-500 relative">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <PartnerExperienceGate />
       {/* Theme Ambient Background Layer */}
       <ThemeBackground />
@@ -24,7 +27,11 @@ export function AppShell({ children }: AppShellProps) {
       {/* Main Content Viewport */}
       <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-8">
         <Header />
-        <main className="flex-1 px-3.5 py-4 sm:px-6 sm:py-6 max-w-5xl w-full mx-auto">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 px-3.5 py-4 sm:px-6 sm:py-6 max-w-5xl w-full mx-auto focus:outline-none"
+        >
           {children}
         </main>
       </div>

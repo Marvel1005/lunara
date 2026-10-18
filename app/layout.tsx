@@ -30,15 +30,13 @@ export const metadata: Metadata = {
     title: 'Lunara — cycle tracking with partner support',
     description:
       'Gentle period and symptom tracking plus optional comfort sharing with someone you trust.',
-    images: [{ url: '/icon.png' }],
     type: 'website',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'Lunara — Your cycle. Your comfort.',
     description:
       'Private cycle, pain, and mood tracking with optional partner comfort sharing.',
-    images: ['/icon.png'],
   },
 };
 
@@ -49,7 +47,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${outfit.variable} ${fraunces.variable}`}>
-      <body className="antialiased selection:bg-lunara-rose selection:text-lunara-plum">
+      <body className="antialiased selection:bg-lunara-rose selection:text-primary">
         <QueryProvider>
           <AuthProvider>
             {children}

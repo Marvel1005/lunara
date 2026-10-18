@@ -1,5 +1,6 @@
 import React from 'react';
 import { LegalFooter } from '@/components/layout/legal-footer';
+import { Logo } from '@/components/brand/logo';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,8 +8,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="w-full max-w-sm sm:max-w-md">
         {/* Brand Banner */}
         <div className="text-center mb-5">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach shadow-soft mb-2 text-xl">
-            🌙
+          <div className="inline-flex mb-2">
+            <Logo size={44} showWordmark={false} />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-foreground">Lunara</h1>
           <p className="text-xs text-muted-fg mt-0.5">Your cycle. Your comfort.</p>

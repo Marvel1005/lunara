@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, Loader2, HeartHandshake } from 'lucide-react';
 import { useAcceptInvitation } from '@/lib/hooks/use-partner';
 import { createClient } from '@/lib/supabase/client';
+import { Logo } from '@/components/brand/logo';
 import Link from 'next/link';
 
 type State = 'loading' | 'confirm' | 'accepting' | 'success' | 'error';
@@ -158,9 +159,7 @@ function PartnerAcceptContent() {
       <div className="w-full max-w-sm">
         {/* Brand header */}
         <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center text-lg shadow-comfort">
-            🌙
-          </div>
+          <Logo size={36} showWordmark={false} />
           <div>
             <p className="text-lg font-bold text-foreground">Lunara</p>
             <p className="text-xs text-muted-fg">Your cycle. Your comfort.</p>

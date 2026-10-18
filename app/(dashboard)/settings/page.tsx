@@ -202,7 +202,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center text-base font-bold text-lunara-plum shadow-soft border border-white shrink-0">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center text-base font-bold text-primary shadow-soft border border-white shrink-0">
             {userInfo.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">

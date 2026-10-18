@@ -11,13 +11,14 @@
   --card-bg: 255 255 255;
   --card-bg-elevated: 255 255 255;
   --card-fg: 45 38 40;
-  --primary: 156 114 125;
-  --primary-fg: 255 255 255;
-  --primary-soft: 245 230 232;
+  /* Brand primary: deep plum #4A1942 */
+  --primary: 74 25 66;
+  --primary-fg: 253 251 247;
+  --primary-soft: 236 224 230;
   --secondary: 230 225 244;
   --secondary-fg: 59 51 75;
   --accent: 232 197 200;
-  --accent-fg: 74 46 53;
+  --accent-fg: 74 25 66;
   --accent-soft: 253 244 245;
   --muted: 243 239 234;
   --muted-fg: 122 111 115;
@@ -40,8 +41,8 @@
   --severity-deep: 122 74 140;
   --severity-deep-fg: 94 53 110;
   --header-bg: 253 251 247;
-  --glow-accent: 156 114 125;
-  --shadow-elevated: 0 12px 32px -8px rgba(74, 46, 53, 0.08);
+  --glow-accent: 74 25 66;
+  --shadow-elevated: 0 12px 32px -8px rgba(74, 25, 66, 0.08);
   --radius-theme: 1.5rem;
 }
 
@@ -55,12 +56,12 @@
   --foreground: 45 38 40;
   --card-bg: 255 255 255;
   --card-bg-elevated: 255 255 255;
-  --primary: 156 114 125;
-  --primary-fg: 255 255 255;
-  --primary-soft: 245 230 232;
+  --primary: 74 25 66;
+  --primary-fg: 253 251 247;
+  --primary-soft: 236 224 230;
   --accent: 232 197 200;
   --border: 239 232 223;
-  --glow-accent: 156 114 125;
+  --glow-accent: 74 25 66;
 }
 
 /* 2. Soft Floral â€” Elegant Botanical (Rosewood & Sage) */
@@ -379,6 +380,32 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Global keyboard focus ring — visible on every interactive element */
+:focus-visible {
+  outline: 2px solid rgb(var(--primary) / 0.7);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Skip-to-content link: visually hidden until focused */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem;
+  background: rgb(var(--primary));
+  color: rgb(var(--primary-fg));
+  font-size: 0.75rem;
+  font-weight: 600;
+  transform: translateY(-200%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
 }
 
 /* Hide browser-native password reveal buttons (Chrome/Edge/1Password) */

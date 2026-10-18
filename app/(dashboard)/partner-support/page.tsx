@@ -19,9 +19,10 @@ function PartnerView() {
 
   if (partnerConnections.isLoading || isLoading) {
     return (
-      <div className="space-y-4 animate-pulse">
+      <div className="space-y-4 animate-pulse" role="status" aria-busy="true">
         <div className="h-24 rounded-3xl bg-muted/50" />
         <div className="h-40 rounded-3xl bg-muted/30" />
+        <span className="sr-only">Loading partner updates…</span>
       </div>
     );
   }

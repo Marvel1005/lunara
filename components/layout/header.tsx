@@ -8,6 +8,7 @@ import { useAuth } from '@/providers/auth-provider';
 import { Sparkles, Heart, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Logo } from '@/components/brand/logo';
 
 interface HeaderProps {
   userName?: string;
@@ -42,8 +43,7 @@ export function Header({ userName: initialName }: HeaderProps) {
         {/* Left Mobile Brand Title / Quick Phase indicator */}
         <div className="flex items-center gap-3">
           <div className="lg:hidden flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight text-primary">Lunara</span>
-            <span className="text-xs">🌙</span>
+            <Logo size={22} wordmarkClassName="text-primary" />
           </div>
           {cycleSummary.hasCycleData && (
             <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-primary-soft text-primary text-xs font-medium border border-border">

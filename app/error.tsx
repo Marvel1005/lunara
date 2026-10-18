@@ -16,7 +16,7 @@ export default function Error({
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
-      <div className="w-16 h-16 rounded-full bg-lunara-blush/60 flex items-center justify-center mb-4 text-lunara-plum shadow-soft">
+      <div className="w-16 h-16 rounded-full bg-lunara-blush/60 flex items-center justify-center mb-4 text-primary shadow-soft">
         <HeartHandshake className="w-8 h-8 text-primary" />
       </div>
       <h2 className="text-2xl font-semibold tracking-tight text-foreground mb-2">

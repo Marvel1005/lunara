@@ -46,7 +46,7 @@ export function PainLocationSelector({
               disabled={disabled}
               className={`min-h-[48px] px-3.5 py-2.5 rounded-2xl border text-xs font-semibold flex items-center justify-between transition-all cursor-pointer text-left ${
                 isSelected
-                  ? 'bg-lunara-rose/30 border-lunara-rose text-lunara-plum font-bold shadow-soft ring-1 ring-primary/40'
+                  ? 'bg-lunara-rose/30 border-lunara-rose text-primary font-bold shadow-soft ring-1 ring-primary/40'
                   : 'bg-muted/40 hover:bg-muted/70 border-border text-foreground'
               }`}
             >

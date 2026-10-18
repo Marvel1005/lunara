@@ -42,7 +42,11 @@ export function OtpInput({ length, value, onChange }: OtpInputProps) {
   };
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div
+      className="flex items-center justify-center gap-2"
+      role="group"
+      aria-label={`${length}-digit verification code`}
+    >
       {Array.from({ length }, (_, i) => (
         <input
           key={i}
@@ -50,7 +54,8 @@ export function OtpInput({ length, value, onChange }: OtpInputProps) {
           type="text"
           inputMode="numeric"
           autoComplete={i === 0 ? 'one-time-code' : 'off'}
-          maxLength={2}
+          maxLength={1}
+          aria-label={`Digit ${i + 1} of ${length}`}
           value={value[i] ?? ''}
           onChange={(e) => handleChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}

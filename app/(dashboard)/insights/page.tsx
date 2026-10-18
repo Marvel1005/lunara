@@ -5,6 +5,7 @@ import { usePeriods } from '@/lib/hooks/use-periods';
 import { usePainLogs } from '@/lib/hooks/use-pain';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
 import { DataErrorBanner } from '@/components/data-error-banner';
+import { SkeletonPage } from '@/components/skeleton';
 import { calculateCycleSummary } from '@/lib/cycle/engine';
 import { ThemeCornerDecor, ThemeEmptyStateDecor, ThemeBadge } from '@/components/theme/theme-decorations';
 import {
@@ -89,7 +90,9 @@ export default function InsightsPage() {
         />
       )}
 
-      {!hasData ? (
+      {isLoadingPeriods || isLoadingPain ? (
+        <SkeletonPage label="Loading your insights" />
+      ) : !hasData ? (
         /* Emotionally Appropriate Warm Empty State */
         <ThemeEmptyStateDecor
           emoji="📈"

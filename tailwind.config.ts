@@ -75,7 +75,6 @@ const config: Config = {
           cream: "#FDFBF7",
           blush: "#F5E6E8",
           rose: "#E8C5C8",
-          plum: "#4A2E35",
           charcoal: "#2D2628",
           lavender: "#E6E1F4",
           peach: "#FBE3D6",
@@ -90,10 +89,10 @@ const config: Config = {
         "5xl": "2.5rem",
       },
       boxShadow: {
-        soft: "0 10px 30px -10px rgba(74, 46, 53, 0.05), 0 4px 12px -2px rgba(74, 46, 53, 0.03)",
-        comfort: "0 20px 40px -15px rgba(232, 197, 200, 0.35), 0 8px 20px -6px rgba(74, 46, 53, 0.05)",
+        soft: "0 10px 30px -10px rgba(74, 25, 66, 0.05), 0 4px 12px -2px rgba(74, 25, 66, 0.03)",
+        comfort: "0 20px 40px -15px rgba(232, 197, 200, 0.35), 0 8px 20px -6px rgba(74, 25, 66, 0.05)",
         glow: "0 0 25px rgba(232, 197, 200, 0.4)",
-        card: "0 4px 20px -2px rgba(45, 38, 40, 0.04)",
+        card: "0 4px 20px -2px rgba(74, 25, 66, 0.04)",
       },
       fontFamily: {
         sans: ["var(--font-outfit)", "Inter", "sans-serif"],

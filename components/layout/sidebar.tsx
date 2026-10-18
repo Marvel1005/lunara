@@ -6,6 +6,7 @@ import { usePartnerMode } from '@/lib/hooks/use-partner-mode';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Logo } from '@/components/brand/logo';
 import {
   LayoutDashboard,
   Calendar,
@@ -61,9 +62,7 @@ export function Sidebar() {
       <div className="space-y-5">
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-2 md:justify-center lg:justify-start">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-lunara-rose via-lunara-lavender to-lunara-peach flex items-center justify-center shadow-comfort text-lg shrink-0">
-            🌙
-          </div>
+          <Logo size={36} showWordmark={false} />
           <div className="hidden lg:block">
             <h1 className="text-xl font-bold tracking-tight text-foreground">Lunara</h1>
             <p className="text-xs text-muted-fg font-medium">Your cycle. Your comfort.</p>
@@ -93,6 +92,8 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 title={item.name}
+                aria-label={item.name}
+                aria-current={isActive ? 'page' : undefined}
                 className={`flex items-center md:justify-center lg:justify-start gap-3 md:px-0 lg:px-3.5 py-2.5 rounded-2xl text-xs font-medium transition-all ${
                   isActive
                     ? 'bg-primary text-primary-fg shadow-comfort font-semibold'
@@ -101,6 +102,7 @@ export function Sidebar() {
               >
                 <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-muted-fg'}`} />
                 <span className="hidden lg:inline">{item.name}</span>
+                <span className="sr-only lg:hidden">{item.name}</span>
               </Link>
             );
           })}
