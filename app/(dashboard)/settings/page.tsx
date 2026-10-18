@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ThemeSelector } from '@/components/theme/theme-selector';
 import { SecuritySettings } from '@/components/settings/security-settings';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { createClient } from '@/lib/supabase/client';
 import { useCycleSettings } from '@/lib/hooks/use-cycle';
 import { useAuth } from '@/providers/auth-provider';
@@ -15,6 +16,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Palette,
+  Download,
+  Trash2,
 } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -140,7 +143,36 @@ export default function SettingsPage() {
       router.push('/login');
       router.refresh();
     } catch (err) {
-      console.error('Sign out error:', err);
+      console.error('Sign out error:', err instanceof Error ? err.message : 'Unknown error');
+    }
+  };
+
+  // ── Data export & account deletion ────────────────────────────────────────
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [dataError, setDataError] = useState<string | null>(null);
+
+  const handleExport = () => {
+    // Session cookie authenticates the route; browser downloads the JSON.
+    window.location.href = '/api/export';
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    setDataError(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.functions.invoke('delete-account', {
+        method: 'POST',
+      });
+      if (error) throw new Error(error.message ?? 'Deletion failed.');
+      // Local session is meaningless now — clear it and leave.
+      await supabase.auth.signOut().catch(() => undefined);
+      window.location.href = '/login';
+    } catch {
+      setDataError("We couldn't delete your account. Please try again later.");
+      setDeleting(false);
+      setDeleteOpen(false);
     }
   };
 
@@ -324,7 +356,59 @@ export default function SettingsPage() {
         <ThemeSelector />
       </div>
 
-      {/* 5. PRIVACY FOOTER NOTE */}
+      {/* 5. YOUR DATA */}
+      <div className="glass-panel p-5 rounded-2xl shadow-soft border border-border space-y-3">
+        <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          <h2 className="text-sm font-bold text-foreground">Your data</h2>
+        </div>
+
+        {dataError && (
+          <div
+            className="p-3 rounded-2xl bg-danger/10 border border-danger/20 text-danger-fg text-xs"
+            role="alert"
+          >
+            {dataError}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-2.5">
+          <button
+            type="button"
+            onClick={handleExport}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-muted text-foreground text-xs font-semibold hover:opacity-90 transition-all cursor-pointer min-h-[44px]"
+          >
+            <Download className="w-4 h-4" aria-hidden="true" />
+            Export my data (JSON)
+          </button>
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            disabled={deleting}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-danger/10 text-danger-fg text-xs font-semibold hover:bg-danger/15 transition-all cursor-pointer min-h-[44px] disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
+            {deleting ? 'Deleting…' : 'Delete my account'}
+          </button>
+        </div>
+
+        <p className="text-[11px] text-muted-fg leading-relaxed">
+          Export downloads everything Lunara stores about you. Deletion permanently
+          removes your account, all logs, and your partner connections — this cannot
+          be undone.
+        </p>
+      </div>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        title="Delete your account?"
+        message="This permanently removes your profile, every logged entry, and your partner connections. It cannot be undone."
+        confirmLabel={deleting ? 'Deleting…' : 'Delete everything'}
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setDeleteOpen(false)}
+      />
+
+      {/* 6. PRIVACY FOOTER NOTE */}
       <div className="flex items-center justify-center gap-2 p-3 text-xs text-muted-fg text-center">
         <ShieldCheck className="w-4 h-4 text-success shrink-0" />
         <span>Your cycle and body data is private and accessible only to you.</span>

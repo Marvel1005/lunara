@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { EmailMagicLinkForm } from '@/components/auth/email-auth-form';
 import { magicLinkErrorMessage } from '@/lib/auth';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 import { AlertCircle } from 'lucide-react';
 
 export default function SignUpPage({
@@ -8,7 +9,10 @@ export default function SignUpPage({
 }: {
   searchParams?: { [key: string]: string | string[] | undefined };
 }) {
-  const redirectTo = typeof searchParams?.redirectTo === 'string' ? searchParams.redirectTo : null;
+  const rawRedirect =
+    typeof searchParams?.redirectTo === 'string' ? searchParams.redirectTo : null;
+  // Sanitized once here so the value is safe wherever it is embedded.
+  const redirectTo = rawRedirect ? safeRedirectPath(rawRedirect, '') || null : null;
   const authError = magicLinkErrorMessage(
     typeof searchParams?.error === 'string' ? searchParams.error : null
   );

@@ -2,11 +2,7 @@ import { type EmailOtpType } from '@supabase/supabase-js';
 import { type NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { AUTH_NEXT_COOKIE } from '@/lib/auth';
-
-function safeDestination(raw: string | null): string {
-  if (raw && raw.startsWith('/') && !raw.startsWith('//')) return raw;
-  return '/dashboard';
-}
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 function clearAuthDestinationCookie(res: NextResponse): void {
   res.cookies.set(AUTH_NEXT_COOKIE, '', {
@@ -32,7 +28,7 @@ export async function GET(request: NextRequest) {
       next = null;
     }
   }
-  const destination = new URL(safeDestination(next), origin);
+  const destination = new URL(safeRedirectPath(next), origin);
 
   const clearDestinationAnd = (res: NextResponse) => {
     clearAuthDestinationCookie(res);

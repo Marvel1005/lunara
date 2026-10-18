@@ -303,8 +303,9 @@ export default function PartnerAcceptPage() {
   return (
     <React.Suspense
       fallback={
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <div className="min-h-screen bg-background flex items-center justify-center" role="status">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" aria-hidden="true" />
+          <span className="sr-only">Loading invitation…</span>
         </div>
       }
     >

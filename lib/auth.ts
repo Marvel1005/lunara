@@ -9,6 +9,8 @@ export const AUTH_NEXT_COOKIE = 'lunara_magic_next';
 export function magicLinkErrorMessage(code: string | null): string | null {
   if (code === 'magic_link_invalid')
     return 'That sign-in link is invalid or has expired. Please request a new one to continue.';
+  if (code === 'session_expired')
+    return 'Your session ended for security. Please sign in again to continue.';
   if (code)
     return "We couldn't complete that sign-in. Please try again.";
   return null;

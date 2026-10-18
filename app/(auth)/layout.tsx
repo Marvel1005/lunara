@@ -1,8 +1,9 @@
 import React from 'react';
+import { LegalFooter } from '@/components/layout/legal-footer';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background text-foreground flex items-center justify-center py-8 px-4 sm:px-6">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center py-8 px-4 sm:px-6">
       <div className="w-full max-w-sm sm:max-w-md">
         {/* Brand Banner */}
         <div className="text-center mb-5">
@@ -18,6 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
       </div>
+      <LegalFooter className="mt-6" />
     </div>
   );
 }

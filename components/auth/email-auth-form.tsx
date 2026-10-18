@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { AlertCircle } from 'lucide-react';
 import { OtpInput } from './otp-input';
 import { PasswordInput, validatePassword } from '@/components/password-input';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -64,10 +65,7 @@ export function EmailMagicLinkForm({
   switchLink,
   redirectTo,
 }: EmailMagicLinkFormProps) {
-  const validTarget =
-    redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//')
-      ? redirectTo
-      : '/dashboard';
+  const validTarget = safeRedirectPath(redirectTo);
 
   const router = useRouter();
 

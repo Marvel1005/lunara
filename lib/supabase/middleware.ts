@@ -1,11 +1,26 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { env } from '@/lib/env';
+import { safeRedirectPath } from '@/lib/auth/redirect';
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
   const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), ms));
   return Promise.race([promise, timeout]);
 }
+
+// Session lifetime policy: sign the user out after 7 days of inactivity
+// (idle timeout) or 30 days total, whichever comes first. Tracked via
+// two first-party cookies; expiry revokes the Supabase session too.
+const IDLE_TIMEOUT_MS = 7 * 24 * 60 * 60 * 1000;
+const ABSOLUTE_TIMEOUT_MS = 30 * 24 * 60 * 60 * 1000;
+const ACTIVITY_REFRESH_MS = 60 * 60 * 1000; // rewrite last-seen hourly max
+
+const SESSION_COOKIE_OPTS = {
+  httpOnly: true,
+  sameSite: 'lax' as const,
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+};
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -57,6 +72,50 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith('/partner-support') ||
     pathname.startsWith('/settings');
 
+  // 2a. Session lifetime enforcement (protected pages only, so API/fetch
+  //     routes never receive an unexpected redirect).
+  if (user && isProtectedPage) {
+    const now = Date.now();
+    const started = Number(Date.parse(request.cookies.get('lunara_session_started')?.value ?? ''));
+    const lastSeen = Number(Date.parse(request.cookies.get('lunara_last_seen')?.value ?? ''));
+
+    const idleExpired = Number.isFinite(lastSeen) && now - lastSeen > IDLE_TIMEOUT_MS;
+    const absoluteExpired = Number.isFinite(started) && now - started > ABSOLUTE_TIMEOUT_MS;
+
+    if (idleExpired || absoluteExpired) {
+      // Revoke the refresh token server-side, then clear cookies and bounce.
+      await withTimeout(supabase.auth.signOut(), 5000);
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      url.search = '';
+      url.searchParams.set('error', 'session_expired');
+      const redirectResponse = NextResponse.redirect(url);
+      supabaseResponse.cookies.getAll().forEach((c) => {
+        redirectResponse.cookies.set(c.name, c.value, { maxAge: 0 });
+      });
+      redirectResponse.cookies.set('lunara_session_started', '', { ...SESSION_COOKIE_OPTS, maxAge: 0 });
+      redirectResponse.cookies.set('lunara_last_seen', '', { ...SESSION_COOKIE_OPTS, maxAge: 0 });
+      return redirectResponse;
+    }
+
+    // Keep the clocks fresh (last-seen at most once an hour to avoid
+    // rewriting cookies on every request).
+    if (!Number.isFinite(started)) {
+      supabaseResponse.cookies.set(
+        'lunara_session_started',
+        new Date(now).toISOString(),
+        { ...SESSION_COOKIE_OPTS, maxAge: ABSOLUTE_TIMEOUT_MS / 1000 }
+      );
+    }
+    if (!Number.isFinite(lastSeen) || now - lastSeen > ACTIVITY_REFRESH_MS) {
+      supabaseResponse.cookies.set(
+        'lunara_last_seen',
+        new Date(now).toISOString(),
+        { ...SESSION_COOKIE_OPTS, maxAge: IDLE_TIMEOUT_MS / 1000 }
+      );
+    }
+  }
+
   // 1. Root route: redirect based on auth status
   if (pathname === '/') {
     const target = user ? '/dashboard' : '/login';
@@ -82,8 +141,7 @@ export async function updateSession(request: NextRequest) {
   // 2. Authenticated users attempting to access login/signup -> Redirect to redirectTo or dashboard
   if (user && isAuthPage) {
     const redirectTo = request.nextUrl.searchParams.get('redirectTo');
-    const validRedirect = redirectTo && redirectTo.startsWith('/') && !redirectTo.startsWith('//');
-    const url = new URL(validRedirect ? redirectTo : '/dashboard', request.url);
+    const url = new URL(safeRedirectPath(redirectTo), request.url);
     const redirectResponse = NextResponse.redirect(url);
     supabaseResponse.cookies.getAll().forEach((c) => {
       redirectResponse.cookies.set(c.name, c.value);
