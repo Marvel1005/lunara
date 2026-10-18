@@ -86,7 +86,7 @@ BEGIN
   IF v_perms.share_period_status OR v_perms.share_cycle_status THEN
     SELECT * INTO v_cycle_settings FROM public.cycle_settings WHERE user_id = v_connection.user_id LIMIT 1;
 
-    IF v_cycle_settings IS NOT NULL THEN
+    IF FOUND THEN
       v_avg_period_len := GREATEST(1, COALESCE(v_cycle_settings.average_period_length, 5));
       v_avg_cycle_len := GREATEST(v_avg_period_len, COALESCE(v_cycle_settings.average_cycle_length, 28));
     END IF;
@@ -94,7 +94,7 @@ BEGIN
     SELECT * INTO v_latest_period FROM public.periods
     WHERE user_id = v_connection.user_id ORDER BY start_date DESC LIMIT 1;
 
-    IF v_latest_period IS NOT NULL THEN
+    IF FOUND THEN
       v_days_since_period_start := CURRENT_DATE - v_latest_period.start_date::date;
 
       IF v_days_since_period_start >= 0 THEN
@@ -135,7 +135,7 @@ BEGIN
     WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
     ORDER BY date DESC, created_at DESC LIMIT 1;
 
-    IF v_latest_pain IS NOT NULL AND v_latest_pain.severity > 0 THEN
+    IF FOUND AND v_latest_pain.severity > 0 THEN
       v_result := v_result || jsonb_build_object('has_pain_today', TRUE, 'pain_status_message', 'Experiencing a painful day');
       IF v_perms.share_pain_severity THEN
         v_result := v_result || jsonb_build_object('pain_severity', GREATEST(0, LEAST(10, v_latest_pain.severity)));
@@ -156,7 +156,7 @@ BEGIN
     WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
     ORDER BY date DESC, created_at DESC LIMIT 1;
 
-    IF v_latest_mood IS NOT NULL THEN
+    IF FOUND THEN
       v_result := v_result || jsonb_build_object('mood', v_latest_mood.mood, 'mood_intensity', v_latest_mood.intensity);
     END IF;
   END IF;
@@ -166,7 +166,7 @@ BEGIN
     WHERE user_id = v_connection.user_id AND date BETWEEN CURRENT_DATE - 1 AND CURRENT_DATE + 1
     ORDER BY date DESC, created_at DESC LIMIT 1;
 
-    IF v_latest_wellness IS NOT NULL THEN
+    IF FOUND THEN
       IF v_perms.share_sleep THEN
         v_result := v_result || jsonb_build_object('sleep_hours', v_latest_wellness.sleep_hours, 'sleep_quality', v_latest_wellness.sleep_quality);
       END IF;
